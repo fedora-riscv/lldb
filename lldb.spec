@@ -7,8 +7,9 @@ License:	NCSA
 URL:		http://llvm.org
 Source0:	http://llvm.org/releases/%{version}/%{name}-%{version}.src.tar.xz
 
-# hack patch from upstream review systems to fix out of tree builds.
-Patch0: D15067.id41365.diff
+# Patch to remove use of private llvm headers
+Patch1: 0001-Replace-uses-of-MIUtilParse-CRegexParser-with-llvm-R.patch
+Patch2: 0001-Remove-MIUtilParse-no-longer-used.patch
 
 BuildRequires:	cmake
 BuildRequires:  llvm-devel = %{version}
@@ -44,8 +45,12 @@ The package contains the LLDB Python module.
 %prep
 %setup -q -n %{name}-%{version}.src
 
-%patch0 -p1 -b .dave
+%patch1 -p1
+%patch2 -p1
+
 %build
+
+rm tools/lldb-mi/MIUtilParse.*
 mkdir -p _build
 cd _build
 
@@ -53,8 +58,8 @@ cd _build
 
 LDFLAGS="%{__global_ldflags} -lpthread -ldl"
 
-CFLAGS="%{optflags} -fno-strict-aliasing -Wno-error=format-security"
-CXXFLAGS="%{optflags} -fno-strict-aliasing -Wno-error=format-security"
+CFLAGS="%{optflags} -fno-strict-aliasing -Wno-error=format-security -fno-rtti"
+CXXFLAGS="%{optflags} -fno-strict-aliasing -Wno-error=format-security -fno-rtti"
 
 %cmake .. \
 	-DCMAKE_BUILD_TYPE=RelWithDebInfo \
