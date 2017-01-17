@@ -1,6 +1,6 @@
 Name:		lldb
-Version:	3.8.0
-Release:	3%{?dist}
+Version:	3.8.1
+Release:	1%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -104,6 +104,9 @@ rm -f %{buildroot}%{python_sitearch}/six.*
 %{python_sitearch}/lldb
 
 %changelog
+* Tue Jan 17 2017 Michael Cronenworth <mike@cchtml.com> - 3.8.1-1
+- lldb 3.8.1
+
 * Mon Nov 14 2016 Nathaniel McCallum <npmccallum@redhat.com> - 3.8.0-3
 - Disable libedit support until upstream fixes it (#1356140)
 
