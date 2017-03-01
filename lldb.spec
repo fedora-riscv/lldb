@@ -1,6 +1,6 @@
 Name:		lldb
-Version:	3.9.0
-Release:	4%{?dist}
+Version:	3.9.1
+Release:	1%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -115,6 +115,9 @@ rm -f %{buildroot}%{python_sitearch}/six.*
 %{python_sitearch}/lldb
 
 %changelog
+* Thu Mar 02 2017 Dave Airlie <airlied@redhat.com - 3.9.1-1
+- lldb 3.9.1
+
 * Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 3.9.0-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 
