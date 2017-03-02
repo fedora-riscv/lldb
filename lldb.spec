@@ -1,5 +1,5 @@
 Name:		lldb
-Version:	3.8.1
+Version:	3.9.1
 Release:	1%{?dist}
 Summary:	Next generation high-performance debugger
 
@@ -104,6 +104,9 @@ rm -f %{buildroot}%{python_sitearch}/six.*
 %{python_sitearch}/lldb
 
 %changelog
+* Thu Mar 02 2017 Dave Airlie <airlied@redhat.com> - 3.9.1-1
+- lldb 3.9.1
+
 * Tue Jan 17 2017 Michael Cronenworth <mike@cchtml.com> - 3.8.1-1
 - lldb 3.8.1
 
