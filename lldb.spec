@@ -72,6 +72,11 @@ CXXFLAGS="%{optflags} -fno-strict-aliasing -Wno-error=format-security -fno-rtti"
 	-DLLDB_DISABLE_CURSES:BOOL=OFF \
 	-DLLDB_DISABLE_LIBEDIT:BOOL=ON \
 	-DLLDB_DISABLE_PYTHON:BOOL=OFF \
+%if 0%{?__isa_bits} == 64
+        -DLLVM_LIBDIR_SUFFIX=64 \
+%else
+        -DLLVM_LIBDIR_SUFFIX= \
+%endif
 	\
 	-DPYTHON_EXECUTABLE:STRING=%{__python} \
 	-DPYTHON_VERSION_MAJOR:STRING=$(%{__python} -c "import sys; print sys.version_info.major") \
