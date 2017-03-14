@@ -1,0 +1,24 @@
+From 7ef45eab67114ce1ed136f0666f34aafd0dab89d Mon Sep 17 00:00:00 2001
+From: Tom Stellard <tstellar@redhat.com>
+Date: Tue, 14 Mar 2017 14:54:10 -0400
+Subject: [PATCH] Fix build with gcc 7
+
+---
+ include/lldb/Utility/TaskPool.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/include/lldb/Utility/TaskPool.h b/include/lldb/Utility/TaskPool.h
+index 3ad9c7c..bcd8186 100644
+--- a/include/lldb/Utility/TaskPool.h
++++ b/include/lldb/Utility/TaskPool.h
+@@ -12,6 +12,7 @@
+ 
+ #include <cassert>
+ #include <cstdint>
++#include <functional>
+ #include <future>
+ #include <list>
+ #include <queue>
+-- 
+1.8.3.1
+
