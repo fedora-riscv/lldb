@@ -1,6 +1,6 @@
 Name:		lldb
 Version:	3.9.1
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -11,6 +11,7 @@ ExclusiveArch:  %{arm} aarch64 %{ix86} x86_64
 # Patch to remove use of private llvm headers
 Patch1: 0001-Replace-uses-of-MIUtilParse-CRegexParser-with-llvm-R.patch
 Patch2: 0001-Remove-MIUtilParse-no-longer-used.patch
+Patch3: 0001-Fix-build-with-gcc-7.patch
 
 BuildRequires:	cmake
 BuildRequires:  llvm-devel = %{version}
@@ -48,6 +49,7 @@ The package contains the LLDB Python module.
 
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 
 %build
 
@@ -115,6 +117,9 @@ rm -f %{buildroot}%{python_sitearch}/six.*
 %{python_sitearch}/lldb
 
 %changelog
+* Tue Mar 14 2017 Tom Stellard <tstellar@redhat.com> - 3.9.1-2
+- Fix build with gcc 7
+
 * Thu Mar 02 2017 Dave Airlie <airlied@redhat.com - 3.9.1-1
 - lldb 3.9.1
 
