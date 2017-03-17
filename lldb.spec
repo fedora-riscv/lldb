@@ -1,6 +1,6 @@
 Name:		lldb
 Version:	3.9.1
-Release:	1%{?dist}
+Release:	1%{?dist}.1
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -47,6 +47,10 @@ The package contains the LLDB Python module.
 
 %patch1 -p1
 %patch2 -p1
+
+# HACK so that lldb can find its custom readline.so, because we move it
+# after install.
+sed -i -e "s~import sys~import sys\nsys.path.insert\(1, '%{python_sitearch}/lldb'\)~g" source/Interpreter/embedded_interpreter.py
 
 %build
 
@@ -114,6 +118,9 @@ rm -f %{buildroot}%{python_sitearch}/six.*
 %{python_sitearch}/lldb
 
 %changelog
+* Fri Mar 17 2017 Tom Stellard <tstellar@redhat.org> - 3.9.1-1.1
+- Adjust python sys.path so lldb can find readline.so
+
 * Thu Mar 02 2017 Dave Airlie <airlied@redhat.com> - 3.9.1-1
 - lldb 3.9.1
 
