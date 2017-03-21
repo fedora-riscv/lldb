@@ -1,6 +1,6 @@
 Name:		lldb
 Version:	3.9.1
-Release:	1%{?dist}.1
+Release:	1%{?dist}.2
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -20,6 +20,9 @@ BuildRequires:  llvm-static = %{version}
 BuildRequires:  libffi-devel
 BuildRequires:  zlib-devel
 BuildRequires:  libxml2-devel
+
+Requires: llvm-libs = %{version}
+Requires: clang-libs = %{version}
 
 %description
 LLDB is a next generation, high-performance debugger. It is built as a set
@@ -118,6 +121,9 @@ rm -f %{buildroot}%{python_sitearch}/six.*
 %{python_sitearch}/lldb
 
 %changelog
+* Tue Mar 21 2017 Tom Stellard <tstellar@redhat.com> - 3.9.1-1.2
+- Add explicit Requires for llvm-libs and clang-libs
+
 * Fri Mar 17 2017 Tom Stellard <tstellar@redhat.org> - 3.9.1-1.1
 - Adjust python sys.path so lldb can find readline.so
 
