@@ -1,6 +1,6 @@
 Name:		lldb
-Version:	3.9.1
-Release:	4%{?dist}
+Version:	4.0.0
+Release:	1%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -9,9 +9,7 @@ Source0:	http://llvm.org/releases/%{version}/%{name}-%{version}.src.tar.xz
 
 ExclusiveArch:  %{arm} aarch64 %{ix86} x86_64
 # Patch to remove use of private llvm headers
-Patch1: 0001-Replace-uses-of-MIUtilParse-CRegexParser-with-llvm-R.patch
-Patch2: 0001-Remove-MIUtilParse-no-longer-used.patch
-Patch3: 0001-Fix-build-with-gcc-7.patch
+Patch0: 0001-Fix-build-with-gcc-7.patch
 
 BuildRequires:	cmake
 BuildRequires:  llvm-devel = %{version}
@@ -50,9 +48,7 @@ The package contains the LLDB Python module.
 %prep
 %setup -q -n %{name}-%{version}.src
 
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
+%patch0 -p1
 
 # HACK so that lldb can find its custom readline.so, because we move it
 # after install.
@@ -60,7 +56,6 @@ sed -i -e "s~import sys~import sys\nsys.path.insert\(1, '%{python_sitearch}/lldb
 
 %build
 
-rm tools/lldb-mi/MIUtilParse.*
 mkdir -p _build
 cd _build
 
@@ -68,8 +63,8 @@ cd _build
 
 LDFLAGS="%{__global_ldflags} -lpthread -ldl"
 
-CFLAGS="%{optflags} -fno-strict-aliasing -Wno-error=format-security -fno-rtti"
-CXXFLAGS="%{optflags} -fno-strict-aliasing -Wno-error=format-security -fno-rtti"
+CFLAGS="%{optflags} -Wno-error=format-security"
+CXXFLAGS="%{optflags} -Wno-error=format-security"
 
 %cmake .. \
 	-DCMAKE_BUILD_TYPE=RelWithDebInfo \
@@ -124,6 +119,9 @@ rm -f %{buildroot}%{python_sitearch}/six.*
 %{python_sitearch}/lldb
 
 %changelog
+* Fri Mar 24 2017 Tom Stellard <tstellar@redhat.com> - 4.0.0-1
+- lldb 4.0.0
+
 * Tue Mar 21 2017 Tom Stellard <tstellar@redhat.com> - 3.9.1-4
 - Add explicit Requires for llvm-libs and clang-libs
 
