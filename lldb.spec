@@ -1,6 +1,6 @@
 Name:		lldb
 Version:	4.0.0
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -119,6 +119,9 @@ rm -f %{buildroot}%{python_sitearch}/six.*
 %{python_sitearch}/lldb
 
 %changelog
+* Mon May 15 2017 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 4.0.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_27_Mass_Rebuild
+
 * Fri Mar 24 2017 Tom Stellard <tstellar@redhat.com> - 4.0.0-1
 - lldb 4.0.0
 
