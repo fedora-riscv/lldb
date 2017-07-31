@@ -1,6 +1,6 @@
 Name:		lldb
 Version:	4.0.1
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -10,6 +10,8 @@ Source0:	http://llvm.org/releases/%{version}/%{name}-%{version}.src.tar.xz
 ExclusiveArch:  %{arm} aarch64 %{ix86} x86_64
 # Patch to remove use of private llvm headers
 Patch0: 0001-Fix-build-with-gcc-7.patch
+# lldb: libedit produces garbled, unusable input on Linux
+Patch1: r303907-libedit.patch
 
 BuildRequires:	cmake
 BuildRequires:  llvm-devel = %{version}
@@ -20,6 +22,7 @@ BuildRequires:  llvm-static = %{version}
 BuildRequires:  libffi-devel
 BuildRequires:  zlib-devel
 BuildRequires:  libxml2-devel
+BuildRequires:  libedit-devel
 
 Requires: llvm-libs = %{version}
 Requires: clang-libs = %{version}
@@ -49,6 +52,7 @@ The package contains the LLDB Python module.
 %setup -q -n %{name}-%{version}.src
 
 %patch0 -p1
+%patch1 -p1
 
 # HACK so that lldb can find its custom readline.so, because we move it
 # after install.
@@ -75,7 +79,7 @@ CXXFLAGS="%{optflags} -Wno-error=format-security"
 	-DLLDB_PATH_TO_CLANG_BUILD=%{_prefix} \
 	\
 	-DLLDB_DISABLE_CURSES:BOOL=OFF \
-	-DLLDB_DISABLE_LIBEDIT:BOOL=ON \
+	-DLLDB_DISABLE_LIBEDIT:BOOL=OFF \
 	-DLLDB_DISABLE_PYTHON:BOOL=OFF \
 %if 0%{?__isa_bits} == 64
         -DLLVM_LIBDIR_SUFFIX=64 \
@@ -119,6 +123,10 @@ rm -f %{buildroot}%{python_sitearch}/six.*
 %{python_sitearch}/lldb
 
 %changelog
+* Mon Jul 31 2017 Jan Kratochvil <jan.kratochvil@redhat.com> - 4.0.1-3
+- Backport lldb r303907
+  Resolves rhbz #1356140
+
 * Wed Jul 26 2017 Fedora Release Engineering <releng@fedoraproject.org> - 4.0.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
 
