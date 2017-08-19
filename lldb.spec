@@ -1,6 +1,6 @@
 Name:		lldb
 Version:	4.0.1
-Release:	3%{?dist}
+Release:	4%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -40,12 +40,13 @@ Requires:	%{name}%{?_isa} = %{version}-%{release}
 %description devel
 The package contains header files for the LLDB debugger.
 
-%package -n python-lldb
+%package -n python2-lldb
+%{?python_provide:%python_provide python2-lldb}
 Summary:	Python module for LLDB
 BuildRequires:	python2-devel
 Requires:	python2-six
 
-%description -n python-lldb
+%description -n python2-lldb
 The package contains the LLDB Python module.
 
 %prep
@@ -119,10 +120,14 @@ rm -f %{buildroot}%{python_sitearch}/six.*
 %{_includedir}/lldb
 %{_libdir}/*.so
 
-%files -n python-lldb
+%files -n python2-lldb
 %{python_sitearch}/lldb
 
 %changelog
+* Sat Aug 19 2017 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 4.0.1-4
+- Python 2 binary package renamed to python2-lldb
+  See https://fedoraproject.org/wiki/FinalizingFedoraSwitchtoPython3
+
 * Mon Jul 31 2017 Jan Kratochvil <jan.kratochvil@redhat.com> - 4.0.1-3
 - Backport lldb r303907
   Resolves rhbz #1356140
