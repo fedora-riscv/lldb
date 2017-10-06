@@ -1,6 +1,6 @@
 Name:		lldb
-Version:	4.0.1
-Release:	4%{?dist}
+Version:	5.0.0
+Release:	1%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -8,10 +8,6 @@ URL:		http://lldb.llvm.org/
 Source0:	http://llvm.org/releases/%{version}/%{name}-%{version}.src.tar.xz
 
 ExclusiveArch:  %{arm} aarch64 %{ix86} x86_64
-# Patch to remove use of private llvm headers
-Patch0: 0001-Fix-build-with-gcc-7.patch
-# lldb: libedit produces garbled, unusable input on Linux
-Patch1: r303907-libedit.patch
 
 BuildRequires:	cmake
 BuildRequires:  llvm-devel = %{version}
@@ -51,9 +47,6 @@ The package contains the LLDB Python module.
 
 %prep
 %setup -q -n %{name}-%{version}.src
-
-%patch0 -p1
-%patch1 -p1
 
 # HACK so that lldb can find its custom readline.so, because we move it
 # after install.
@@ -109,12 +102,18 @@ mv -v %{buildroot}%{python_sitearch}/readline.so %{buildroot}%{python_sitearch}/
 # remove bundled six.py
 rm -f %{buildroot}%{python_sitearch}/six.*
 
+# Move this plugin to libdir.
+# FIXME: I have no idea why this is installed to bindir.  Moving it to libdir
+# may break it, but I don't know how to test this.
+mv -v %{buildroot}{%{_bindir},%{_libdir}}/liblldb-intel-mpxtable.so
+
 %post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
 
 %files
 %{_bindir}/lldb*
 %{_libdir}/liblldb.so.*
+%{_libdir}/liblldb-intel-mpxtable.so
 
 %files devel
 %{_includedir}/lldb
@@ -124,6 +123,9 @@ rm -f %{buildroot}%{python_sitearch}/six.*
 %{python_sitearch}/lldb
 
 %changelog
+* Fri Oct 06 2017 Tom Stellard <tstellar@redhat.com> - 5.0.0-1
+- 5.0.0 Release
+
 * Sat Aug 19 2017 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 4.0.1-4
 - Python 2 binary package renamed to python2-lldb
   See https://fedoraproject.org/wiki/FinalizingFedoraSwitchtoPython3
