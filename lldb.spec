@@ -1,5 +1,5 @@
 Name:		lldb
-Version:	5.0.0
+Version:	5.0.1
 Release:	1%{?dist}
 Summary:	Next generation high-performance debugger
 
@@ -123,6 +123,9 @@ mv -v %{buildroot}{%{_bindir},%{_libdir}}/liblldb-intel-mpxtable.so
 %{python_sitearch}/lldb
 
 %changelog
+* Thu Dec 21 2017 Tom Stellard <tstellar@redhat.com> - 5.0.1-1
+- 5.0.1 Release
+
 * Fri Oct 06 2017 Tom Stellard <tstellar@redhat.com> - 5.0.0-1
 - 5.0.0 Release
 
