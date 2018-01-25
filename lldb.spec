@@ -1,6 +1,6 @@
 Name:		lldb
 Version:	5.0.1
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -19,9 +19,6 @@ BuildRequires:  libffi-devel
 BuildRequires:  zlib-devel
 BuildRequires:  libxml2-devel
 BuildRequires:  libedit-devel
-
-Requires: llvm-libs = %{version}
-Requires: clang-libs = %{version}
 
 %description
 LLDB is a next generation, high-performance debugger. It is built as a set
@@ -123,6 +120,9 @@ mv -v %{buildroot}{%{_bindir},%{_libdir}}/liblldb-intel-mpxtable.so
 %{python_sitearch}/lldb
 
 %changelog
+* Thu Jan 25 2018 Tom Stellard <tstellar@redhat.com> - 5.0.1-2
+- Drop explicit dependencies for llvm-libs and clang-libs
+
 * Thu Dec 21 2017 Tom Stellard <tstellar@redhat.com> - 5.0.1-1
 - 5.0.1 Release
 
