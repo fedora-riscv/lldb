@@ -1,11 +1,13 @@
+%global rc_ver 1
+
 Name:		lldb
-Version:	5.0.1
-Release:	2%{?dist}
+Version:	6.0.0
+Release:	0.1.rc%{rc_ver}%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
 URL:		http://lldb.llvm.org/
-Source0:	http://llvm.org/releases/%{version}/%{name}-%{version}.src.tar.xz
+Source0:	http://llvm.org/releases/%{version}/%{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src.tar.xz
 
 ExclusiveArch:  %{arm} aarch64 %{ix86} x86_64
 
@@ -43,7 +45,7 @@ Requires:	python2-six
 The package contains the LLDB Python module.
 
 %prep
-%setup -q -n %{name}-%{version}.src
+%setup -q -n %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 # HACK so that lldb can find its custom readline.so, because we move it
 # after install.
@@ -99,18 +101,13 @@ mv -v %{buildroot}%{python_sitearch}/readline.so %{buildroot}%{python_sitearch}/
 # remove bundled six.py
 rm -f %{buildroot}%{python_sitearch}/six.*
 
-# Move this plugin to libdir.
-# FIXME: I have no idea why this is installed to bindir.  Moving it to libdir
-# may break it, but I don't know how to test this.
-mv -v %{buildroot}{%{_bindir},%{_libdir}}/liblldb-intel-mpxtable.so
-
 %post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
 
 %files
 %{_bindir}/lldb*
 %{_libdir}/liblldb.so.*
-%{_libdir}/liblldb-intel-mpxtable.so
+%{_libdir}/liblldbIntelFeatures.so.*
 
 %files devel
 %{_includedir}/lldb
@@ -120,8 +117,8 @@ mv -v %{buildroot}{%{_bindir},%{_libdir}}/liblldb-intel-mpxtable.so
 %{python_sitearch}/lldb
 
 %changelog
-* Thu Jan 25 2018 Tom Stellard <tstellar@redhat.com> - 5.0.1-2
-- Drop explicit dependencies for llvm-libs and clang-libs
+* Thu Jan 25 2018 Tom Stellard <tstellar@redhat.com> - 6.0.0-0.1.rc1
+- 6.0.1-rc1 Release
 
 * Thu Dec 21 2017 Tom Stellard <tstellar@redhat.com> - 5.0.1-1
 - 5.0.1 Release
