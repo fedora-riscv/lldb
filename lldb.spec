@@ -1,11 +1,12 @@
 Name:		lldb
 Version:	6.0.0
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
 URL:		http://lldb.llvm.org/
 Source0:	http://llvm.org/releases/%{version}/%{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src.tar.xz
+Patch0: 	0001-Partially-revert-CMake-Cleanup-unnecessary-definitio.patch
 
 ExclusiveArch:  %{arm} aarch64 %{ix86} x86_64
 
@@ -44,6 +45,8 @@ The package contains the LLDB Python module.
 
 %prep
 %setup -q -n %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
+
+%patch0 -p1
 
 # HACK so that lldb can find its custom readline.so, because we move it
 # after install.
@@ -115,6 +118,9 @@ rm -f %{buildroot}%{python_sitearch}/six.*
 %{python_sitearch}/lldb
 
 %changelog
+* Wed Mar 14 2018 Tilmann Scheller <tschelle@redhat.com> - 6.0.0-2
+- Restore LLDB SB API headers, fixes rhbz#1548758
+
 * Fri Mar 09 2018 Tom Stellard <tstellar@redhat.com> - 6.0.0-1
 - 6.0.0 Release
 
