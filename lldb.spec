@@ -1,8 +1,6 @@
-%global rc_ver 2
-
 Name:		lldb
 Version:	6.0.0
-Release:	0.3.rc%{rc_ver}%{?dist}
+Release:	1%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -117,6 +115,9 @@ rm -f %{buildroot}%{python_sitearch}/six.*
 %{python_sitearch}/lldb
 
 %changelog
+* Fri Mar 09 2018 Tom Stellard <tstellar@redhat.com> - 6.0.0-1
+- 6.0.0 Release
+
 * Tue Feb 13 2018 Tom Stellard <tstellar@redhat.com> - 6.0.0-0.3.rc2
 - 6.0.0-rc2 release
 
