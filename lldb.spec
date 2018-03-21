@@ -1,6 +1,6 @@
 Name:		lldb
 Version:	6.0.0
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -118,6 +118,9 @@ rm -f %{buildroot}%{python_sitearch}/six.*
 %{python_sitearch}/lldb
 
 %changelog
+* Tue Mar 20 2018 Tom Stellard <tstellar@redhat.com> - 6.0.0-3
+- Rebuild against llvm with the rhbz#1558657 fix
+
 * Wed Mar 14 2018 Tilmann Scheller <tschelle@redhat.com> - 6.0.0-2
 - Restore LLDB SB API headers, fixes rhbz#1548758
 
