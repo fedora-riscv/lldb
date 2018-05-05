@@ -1,6 +1,6 @@
 Name:		lldb
 Version:	6.0.0
-Release:	3%{?dist}
+Release:	4%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -50,7 +50,7 @@ The package contains the LLDB Python module.
 
 # HACK so that lldb can find its custom readline.so, because we move it
 # after install.
-sed -i -e "s~import sys~import sys\nsys.path.insert\(1, '%{python_sitearch}/lldb'\)~g" source/Interpreter/embedded_interpreter.py
+sed -i -e "s~import sys~import sys\nsys.path.insert\(1, '%{python2_sitearch}/lldb'\)~g" source/Interpreter/embedded_interpreter.py
 
 %build
 
@@ -81,9 +81,9 @@ CXXFLAGS="%{optflags} -Wno-error=format-security"
         -DLLVM_LIBDIR_SUFFIX= \
 %endif
 	\
-	-DPYTHON_EXECUTABLE:STRING=%{__python} \
-	-DPYTHON_VERSION_MAJOR:STRING=$(%{__python} -c "import sys; print sys.version_info.major") \
-	-DPYTHON_VERSION_MINOR:STRING=$(%{__python} -c "import sys; print sys.version_info.minor")
+	-DPYTHON_EXECUTABLE:STRING=%{__python2} \
+	-DPYTHON_VERSION_MAJOR:STRING=$(%{__python2} -c "import sys; print sys.version_info.major") \
+	-DPYTHON_VERSION_MINOR:STRING=$(%{__python2} -c "import sys; print sys.version_info.minor")
 
 make %{?_smp_mflags}
 
@@ -96,11 +96,11 @@ rm -fv %{buildroot}%{_libdir}/*.a
 
 # python: fix binary libraries location
 liblldb=$(basename $(readlink -e %{buildroot}%{_libdir}/liblldb.so))
-ln -vsf "../../../${liblldb}" %{buildroot}%{python_sitearch}/lldb/_lldb.so
-mv -v %{buildroot}%{python_sitearch}/readline.so %{buildroot}%{python_sitearch}/lldb/readline.so
+ln -vsf "../../../${liblldb}" %{buildroot}%{python2_sitearch}/lldb/_lldb.so
+mv -v %{buildroot}%{python2_sitearch}/readline.so %{buildroot}%{python2_sitearch}/lldb/readline.so
 
 # remove bundled six.py
-rm -f %{buildroot}%{python_sitearch}/six.*
+rm -f %{buildroot}%{python2_sitearch}/six.*
 
 %post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
@@ -115,9 +115,13 @@ rm -f %{buildroot}%{python_sitearch}/six.*
 %{_libdir}/*.so
 
 %files -n python2-lldb
-%{python_sitearch}/lldb
+%{python2_sitearch}/lldb
 
 %changelog
+* Sat May 05 2018 Miro Hrončok <mhroncok@redhat.com> - 6.0.0-4
+- Update Python macros to new packaging standards
+  (See https://fedoraproject.org/wiki/Changes/Avoid_usr_bin_python_in_RPM_Build)
+
 * Tue Mar 20 2018 Tom Stellard <tstellar@redhat.com> - 6.0.0-3
 - Rebuild against llvm with the rhbz#1558657 fix
 
