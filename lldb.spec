@@ -1,6 +1,6 @@
 Name:		lldb
-Version:	5.0.1
-Release:	2%{?dist}
+Version:	5.0.2
+Release:	1%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -120,6 +120,9 @@ mv -v %{buildroot}{%{_bindir},%{_libdir}}/liblldb-intel-mpxtable.so
 %{python_sitearch}/lldb
 
 %changelog
+* Tue May 8 2018 Tom Stellard <tstellar@redhat.com> - 5.0.2-1
+- 5.0.2 Release
+
 * Thu Jan 25 2018 Tom Stellard <tstellar@redhat.com> - 5.0.1-2
 - Drop explicit dependencies for llvm-libs and clang-libs
 
