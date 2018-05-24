@@ -1,12 +1,13 @@
+%global rc_ver 1
+
 Name:		lldb
-Version:	6.0.0
-Release:	4%{?dist}
+Version:	6.0.1
+Release:	0.1.rc%{rc_ver}%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
 URL:		http://lldb.llvm.org/
 Source0:	http://llvm.org/releases/%{version}/%{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src.tar.xz
-Patch0: 	0001-Partially-revert-CMake-Cleanup-unnecessary-definitio.patch
 
 ExclusiveArch:  %{arm} aarch64 %{ix86} x86_64
 
@@ -45,8 +46,6 @@ The package contains the LLDB Python module.
 
 %prep
 %setup -q -n %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
-
-%patch0 -p1
 
 # HACK so that lldb can find its custom readline.so, because we move it
 # after install.
@@ -118,6 +117,9 @@ rm -f %{buildroot}%{python2_sitearch}/six.*
 %{python2_sitearch}/lldb
 
 %changelog
+* Mon May 21 2018 Tom Stellard <tstellar@redhat.com> - 6.0.1-0.1.rc1
+- 6.0.1-rc1 Release
+
 * Sat May 05 2018 Miro Hrončok <mhroncok@redhat.com> - 6.0.0-4
 - Update Python macros to new packaging standards
   (See https://fedoraproject.org/wiki/Changes/Avoid_usr_bin_python_in_RPM_Build)
