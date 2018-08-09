@@ -1,13 +1,13 @@
 Name:		lldb
 Version:	6.0.1
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
 URL:		http://lldb.llvm.org/
 Source0:	http://llvm.org/releases/%{version}/%{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src.tar.xz
 
-ExclusiveArch:  %{arm} aarch64 %{ix86} x86_64
+ExclusiveArch:  %{arm} aarch64 %{ix86} x86_64 ppc64le
 
 BuildRequires:	cmake
 BuildRequires:  llvm-devel = %{version}
@@ -115,6 +115,9 @@ rm -f %{buildroot}%{python2_sitearch}/six.*
 %{python2_sitearch}/lldb
 
 %changelog
+* Tue Aug 07 2018 Tom Stellard <tstellar@redhat.com> - 6.0.1-3
+- Enable ppc64le arch
+
 * Fri Jul 13 2018 Fedora Release Engineering <releng@fedoraproject.org> - 6.0.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
