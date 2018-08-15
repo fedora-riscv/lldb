@@ -1,11 +1,13 @@
+%global rc_ver 1
+
 Name:		lldb
-Version:	6.0.1
-Release:	3%{?dist}
+Version:	7.0.0
+Release:	0.1.rc%{rc_ver}%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
 URL:		http://lldb.llvm.org/
-Source0:	http://llvm.org/releases/%{version}/%{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src.tar.xz
+Source0:	http://%{?rc_ver:pre}releases.llvm.org/%{version}/%{?rc_ver:rc%{rc_ver}}/%{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src.tar.xz
 
 ExclusiveArch:  %{arm} aarch64 %{ix86} x86_64 ppc64le
 
@@ -115,6 +117,9 @@ rm -f %{buildroot}%{python2_sitearch}/six.*
 %{python2_sitearch}/lldb
 
 %changelog
+* Tue Aug 14 2018 Tom Stellard <tstellar@redhat.com> - 7.0.0-0.1.rc1
+- 7.0.1-rc1 Release
+
 * Tue Aug 07 2018 Tom Stellard <tstellar@redhat.com> - 6.0.1-3
 - Enable ppc64le arch
 
