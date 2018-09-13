@@ -2,14 +2,12 @@
 
 Name:		lldb
 Version:	7.0.0
-Release:	0.2.rc%{rc_ver}%{?dist}
+Release:	0.3.rc%{rc_ver}%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
 URL:		http://lldb.llvm.org/
 Source0:	http://%{?rc_ver:pre}releases.llvm.org/%{version}/%{?rc_ver:rc%{rc_ver}}/%{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src.tar.xz
-
-ExclusiveArch:  %{arm} aarch64 %{ix86} x86_64 ppc64le
 
 BuildRequires:	cmake
 BuildRequires:  llvm-devel = %{version}
@@ -117,6 +115,9 @@ rm -f %{buildroot}%{python2_sitearch}/six.*
 %{python2_sitearch}/lldb
 
 %changelog
+* Wed Sep 12 2018 Tom Stellard <tstellar@redhat.com> - 7.0.0-0.3.rc2
+- Enable build on s390x
+
 * Fri Aug 31 2018 Tom Stellard <tstellar@redhat.com> - 7.0.0-0.2.rc2
 - 7.0.0-rc2 Release
 
