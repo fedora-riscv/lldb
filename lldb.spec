@@ -1,8 +1,8 @@
-%global rc_ver 2
+%global rc_ver 3
 
 Name:		lldb
 Version:	7.0.0
-Release:	0.3.rc%{rc_ver}%{?dist}
+Release:	0.4.rc%{rc_ver}%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -115,6 +115,9 @@ rm -f %{buildroot}%{python2_sitearch}/six.*
 %{python2_sitearch}/lldb
 
 %changelog
+* Mon Sep 17 2018 Tom Stellard <tstellar@redhat.com> - 7.0.0-0.4.rc3
+- 7.0.0-rc3 Release
+
 * Wed Sep 12 2018 Tom Stellard <tstellar@redhat.com> - 7.0.0-0.3.rc2
 - Enable build on s390x
 
