@@ -1,8 +1,6 @@
-%global rc_ver 3
-
 Name:		lldb
 Version:	7.0.0
-Release:	0.5.rc%{rc_ver}%{?dist}
+Release:	1%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -117,6 +115,9 @@ rm -f %{buildroot}%{python2_sitearch}/six.*
 %{python2_sitearch}/lldb
 
 %changelog
+* Tue Sep 25 2018 Tom Stellard <tstellar@redhat.com> - 7.0.0-1
+- 7.0.0 Release
+
 * Fri Sep 21 2018 Tom Stellard <tstellar@redhat.com> - 7.0.0-0.5.rc3
 - lldb should depend on python2-lldb
 
