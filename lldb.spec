@@ -1,6 +1,8 @@
+#%%global rc_ver 3
+
 Name:		lldb
-Version:	7.0.0
-Release:	2%{?dist}
+Version:	7.0.1
+Release:	1%{?rc_ver:.rc%{rc_ver}}%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -115,6 +117,9 @@ rm -f %{buildroot}%{python2_sitearch}/six.*
 %{python2_sitearch}/lldb
 
 %changelog
+* Mon Dec 17 2018 sguelton@redhat.com - 7.0.1-1
+- 7.0.1 Release
+
 * Tue Dec 04 2018 sguelton@redhat.com - 7.0.0-2
 - Ensure rpmlint passes on specfile
 
