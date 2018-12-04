@@ -1,6 +1,6 @@
 Name:		lldb
 Version:	7.0.0
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -8,17 +8,17 @@ URL:		http://lldb.llvm.org/
 Source0:	http://%{?rc_ver:pre}releases.llvm.org/%{version}/%{?rc_ver:rc%{rc_ver}}/%{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src.tar.xz
 
 BuildRequires:	cmake
-BuildRequires:  llvm-devel = %{version}
-BuildRequires:  clang-devel = %{version}
-BuildRequires:  ncurses-devel
-BuildRequires:  swig
-BuildRequires:  llvm-static = %{version}
-BuildRequires:  libffi-devel
-BuildRequires:  zlib-devel
-BuildRequires:  libxml2-devel
-BuildRequires:  libedit-devel
+BuildRequires:	llvm-devel = %{version}
+BuildRequires:	clang-devel = %{version}
+BuildRequires:	ncurses-devel
+BuildRequires:	swig
+BuildRequires:	llvm-static = %{version}
+BuildRequires:	libffi-devel
+BuildRequires:	zlib-devel
+BuildRequires:	libxml2-devel
+BuildRequires:	libedit-devel
 
-Requires: python2-lldb
+Requires:	python2-lldb
 
 %description
 LLDB is a next generation, high-performance debugger. It is built as a set
@@ -73,9 +73,9 @@ CXXFLAGS="%{optflags} -Wno-error=format-security"
 	-DLLDB_DISABLE_LIBEDIT:BOOL=OFF \
 	-DLLDB_DISABLE_PYTHON:BOOL=OFF \
 %if 0%{?__isa_bits} == 64
-        -DLLVM_LIBDIR_SUFFIX=64 \
+	-DLLVM_LIBDIR_SUFFIX=64 \
 %else
-        -DLLVM_LIBDIR_SUFFIX= \
+	-DLLVM_LIBDIR_SUFFIX= \
 %endif
 	\
 	-DPYTHON_EXECUTABLE:STRING=%{__python2} \
@@ -115,6 +115,9 @@ rm -f %{buildroot}%{python2_sitearch}/six.*
 %{python2_sitearch}/lldb
 
 %changelog
+* Tue Dec 04 2018 sguelton@redhat.com - 7.0.0-2
+- Ensure rpmlint passes on specfile
+
 * Tue Sep 25 2018 Tom Stellard <tstellar@redhat.com> - 7.0.0-1
 - 7.0.0 Release
 
