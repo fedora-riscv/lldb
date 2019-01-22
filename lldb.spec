@@ -101,8 +101,7 @@ mv -v %{buildroot}%{python2_sitearch}/readline.so %{buildroot}%{python2_sitearch
 # remove bundled six.py
 rm -f %{buildroot}%{python2_sitearch}/six.*
 
-%post -p /sbin/ldconfig
-%postun -p /sbin/ldconfig
+%ldconfig_scriptlets
 
 %files
 %{_bindir}/lldb*
