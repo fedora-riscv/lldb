@@ -2,7 +2,7 @@
 
 Name:		lldb
 Version:	7.0.1
-Release:	1%{?rc_ver:.rc%{rc_ver}}%{?dist}
+Release:	1%{?rc_ver:.rc%{rc_ver}}%{?dist}.1
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -116,6 +116,9 @@ rm -f %{buildroot}%{python2_sitearch}/six.*
 %{python2_sitearch}/lldb
 
 %changelog
+* Fri Feb 01 2019 Fedora Release Engineering <releng@fedoraproject.org> - 7.0.1-1.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
+
 * Mon Dec 17 2018 sguelton@redhat.com - 7.0.1-1
 - 7.0.1 Release
 
