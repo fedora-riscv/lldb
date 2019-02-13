@@ -1,0 +1,35 @@
+diff -ru lldb-8.0.0rc1.src.orig/lit/CMakeLists.txt lldb-8.0.0rc1.src/lit/CMakeLists.txt
+--- lldb-8.0.0rc1.src.orig/lit/CMakeLists.txt	2019-02-13 13:55:19.983186453 +0000
++++ lldb-8.0.0rc1.src/lit/CMakeLists.txt	2019-02-13 13:58:01.783865287 +0000
+@@ -19,18 +19,23 @@
+ 
+ list(APPEND LLDB_TEST_DEPS
+   LLDBUnitTests
+-  dsymutil
+-  llc
+   lldb
+   lldb-test
+-  llvm-config
+-  llvm-mc
+-  llvm-objcopy
+-  FileCheck
+-  count
+-  not
+   )
+ 
++if (NOT LLDB_BUILT_STANDALONE)
++  list(APPEND LLDB_TEST_DEPS
++    dsymutil
++    llc
++    llvm-config
++    llvm-mc
++    llvm-objcopy
++    FileCheck
++    count
++    not
++    )
++endif()
++
+ if(TARGET lld)
+   list(APPEND LLDB_TEST_DEPS lld)
+ endif()

@@ -1,13 +1,14 @@
-#%%global rc_ver 3
+%global rc_ver 1
 
 Name:		lldb
-Version:	7.0.1
-Release:	1%{?rc_ver:.rc%{rc_ver}}%{?dist}.1
+Version:	8.0.0
+Release:	1%{?rc_ver:.rc%{rc_ver}}%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
 URL:		http://lldb.llvm.org/
 Source0:	http://%{?rc_ver:pre}releases.llvm.org/%{version}/%{?rc_ver:rc%{rc_ver}}/%{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src.tar.xz
+Patch0:		0001-Fix-test-deps.patch
 
 BuildRequires:	cmake
 BuildRequires:	llvm-devel = %{version}
@@ -19,6 +20,7 @@ BuildRequires:	libffi-devel
 BuildRequires:	zlib-devel
 BuildRequires:	libxml2-devel
 BuildRequires:	libedit-devel
+BuildRequires:	python2-lit
 
 Requires:	python2-lldb
 
@@ -46,6 +48,7 @@ The package contains the LLDB Python module.
 
 %prep
 %setup -q -n %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
+%patch0 -p1 -b .test-dep
 
 # HACK so that lldb can find its custom readline.so, because we move it
 # after install.
@@ -68,9 +71,6 @@ CXXFLAGS="%{optflags} -Wno-error=format-security"
 	-DLLVM_LINK_LLVM_DYLIB:BOOL=ON \
 	-DLLVM_CONFIG:FILEPATH=/usr/bin/llvm-config-%{__isa_bits} \
 	\
-	-DLLDB_PATH_TO_LLVM_BUILD=%{_prefix} \
-	-DLLDB_PATH_TO_CLANG_BUILD=%{_prefix} \
-	\
 	-DLLDB_DISABLE_CURSES:BOOL=OFF \
 	-DLLDB_DISABLE_LIBEDIT:BOOL=OFF \
 	-DLLDB_DISABLE_PYTHON:BOOL=OFF \
@@ -81,8 +81,14 @@ CXXFLAGS="%{optflags} -Wno-error=format-security"
 %endif
 	\
 	-DPYTHON_EXECUTABLE:STRING=%{__python2} \
-	-DPYTHON_VERSION_MAJOR:STRING=$(%{__python2} -c "import sys; print sys.version_info.major") \
-	-DPYTHON_VERSION_MINOR:STRING=$(%{__python2} -c "import sys; print sys.version_info.minor")
+	-DPYTHON_VERSION_MAJOR:STRING=$(%{__python2} -c "import sys; print(sys.version_info.major)") \
+	-DPYTHON_VERSION_MINOR:STRING=$(%{__python2} -c "import sys; print(sys.version_info.minor)") \
+	-DLLVM_EXTERNAL_LIT=%{_bindir}/lit \
+	-DLLVM_LIT_ARGS="-sv \
+	-DFileCheck=%{_libdir}/llvm/FileCheck \
+	-Dcount=%{_libdir}/llvm/count \
+	-Dnot=%{_libdir}/llvm/not \
+	--path %{_libdir}/llvm" \
 
 make %{?_smp_mflags}
 
@@ -97,6 +103,7 @@ rm -fv %{buildroot}%{_libdir}/*.a
 liblldb=$(basename $(readlink -e %{buildroot}%{_libdir}/liblldb.so))
 ln -vsf "../../../${liblldb}" %{buildroot}%{python2_sitearch}/lldb/_lldb.so
 mv -v %{buildroot}%{python2_sitearch}/readline.so %{buildroot}%{python2_sitearch}/lldb/readline.so
+%py_byte_compile %{__python2} %{buildroot}%{python2_sitearch}/lldb
 
 # remove bundled six.py
 rm -f %{buildroot}%{python2_sitearch}/six.*
@@ -116,6 +123,9 @@ rm -f %{buildroot}%{python2_sitearch}/six.*
 %{python2_sitearch}/lldb
 
 %changelog
+* Mon Feb 11 2019 sguelton@redhat.com - 8.0.0-1.rc1
+- 8.0.0 Release candidate 1
+
 * Fri Feb 01 2019 Fedora Release Engineering <releng@fedoraproject.org> - 7.0.1-1.1
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
