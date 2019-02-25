@@ -8,7 +8,6 @@ Summary:	Next generation high-performance debugger
 License:	NCSA
 URL:		http://lldb.llvm.org/
 Source0:	http://%{?rc_ver:pre}releases.llvm.org/%{version}/%{?rc_ver:rc%{rc_ver}}/%{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src.tar.xz
-Patch0:		0001-Fix-test-deps.patch
 
 BuildRequires:	cmake
 BuildRequires:	llvm-devel = %{version}
@@ -48,7 +47,6 @@ The package contains the LLDB Python module.
 
 %prep
 %setup -q -n %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
-%patch0 -p1 -b .test-dep
 
 # HACK so that lldb can find its custom readline.so, because we move it
 # after install.
