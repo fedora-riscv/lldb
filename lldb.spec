@@ -1,8 +1,8 @@
-%global rc_ver 2
+%global rc_ver 3
 
 Name:		lldb
 Version:	8.0.0
-Release:	0.2%{?rc_ver:.rc%{rc_ver}}%{?dist}
+Release:	0.3%{?rc_ver:.rc%{rc_ver}}%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -11,6 +11,7 @@ Source0:	http://%{?rc_ver:pre}releases.llvm.org/%{version}/%{?rc_ver:rc%{rc_ver}
 
 BuildRequires:	cmake
 BuildRequires:	llvm-devel = %{version}
+BuildRequires:	llvm-test = %{version}
 BuildRequires:	clang-devel = %{version}
 BuildRequires:	ncurses-devel
 BuildRequires:	swig
@@ -83,9 +84,6 @@ CXXFLAGS="%{optflags} -Wno-error=format-security"
 	-DPYTHON_VERSION_MINOR:STRING=$(%{__python2} -c "import sys; print(sys.version_info.minor)") \
 	-DLLVM_EXTERNAL_LIT=%{_bindir}/lit \
 	-DLLVM_LIT_ARGS="-sv \
-	-DFileCheck=%{_libdir}/llvm/FileCheck \
-	-Dcount=%{_libdir}/llvm/count \
-	-Dnot=%{_libdir}/llvm/not \
 	--path %{_libdir}/llvm" \
 
 make %{?_smp_mflags}
@@ -121,6 +119,9 @@ rm -f %{buildroot}%{python2_sitearch}/six.*
 %{python2_sitearch}/lldb
 
 %changelog
+* Tue Mar 5 2019 sguelton@redhat.com - 8.0.0-0.3.rc3
+- 8.0.0 Release candidate 3
+
 * Fri Feb 22 2019 sguelton@redhat.com - 8.0.0-0.2.rc2
 - 8.0.0 Release candidate 2
 
