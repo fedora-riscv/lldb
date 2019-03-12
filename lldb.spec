@@ -1,8 +1,8 @@
-%global rc_ver 3
+%global rc_ver 4
 
 Name:		lldb
 Version:	8.0.0
-Release:	0.3%{?rc_ver:.rc%{rc_ver}}%{?dist}
+Release:	0.4%{?rc_ver:.rc%{rc_ver}}%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -119,6 +119,9 @@ rm -f %{buildroot}%{python2_sitearch}/six.*
 %{python2_sitearch}/lldb
 
 %changelog
+* Tue Mar 12 2019 sguelton@redhat.com - 8.0.0-0.4.rc4
+- 8.0.0 Release candidate 4
+
 * Tue Mar 5 2019 sguelton@redhat.com - 8.0.0-0.3.rc3
 - 8.0.0 Release candidate 3
 
