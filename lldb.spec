@@ -2,12 +2,14 @@
 
 Name:		lldb
 Version:	8.0.0
-Release:	1%{?rc_ver:.rc%{rc_ver}}%{?dist}
+Release:	2%{?rc_ver:.rc%{rc_ver}}%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
 URL:		http://lldb.llvm.org/
 Source0:	http://%{?rc_ver:pre}releases.llvm.org/%{version}/%{?rc_ver:rc%{rc_ver}}/%{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src.tar.xz
+
+Patch1:		python3.patch
 
 BuildRequires:	cmake
 BuildRequires:	llvm-devel = %{version}
@@ -20,9 +22,9 @@ BuildRequires:	libffi-devel
 BuildRequires:	zlib-devel
 BuildRequires:	libxml2-devel
 BuildRequires:	libedit-devel
-BuildRequires:	python2-lit
+BuildRequires:	python3-lit
 
-Requires:	python2-lldb
+Requires:	python3-lldb
 
 %description
 LLDB is a next generation, high-performance debugger. It is built as a set
@@ -37,21 +39,23 @@ Requires:	%{name}%{?_isa} = %{version}-%{release}
 %description devel
 The package contains header files for the LLDB debugger.
 
-%package -n python2-lldb
-%{?python_provide:%python_provide python2-lldb}
+%package -n python3-lldb
+%{?python_provide:%python_provide python3-lldb}
 Summary:	Python module for LLDB
-BuildRequires:	python2-devel
-Requires:	python2-six
+BuildRequires:	python3-devel
+Requires:	python3-six
 
-%description -n python2-lldb
+%description -n python3-lldb
 The package contains the LLDB Python module.
 
 %prep
 %setup -q -n %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
+%patch1 -p1 -b .python
+
 # HACK so that lldb can find its custom readline.so, because we move it
 # after install.
-sed -i -e "s~import sys~import sys\nsys.path.insert\(1, '%{python2_sitearch}/lldb'\)~g" source/Interpreter/embedded_interpreter.py
+sed -i -e "s~import sys~import sys\nsys.path.insert\(1, '%{python3_sitearch}/lldb'\)~g" source/Interpreter/embedded_interpreter.py
 
 %build
 
@@ -59,7 +63,6 @@ mkdir -p _build
 cd _build
 
 # Python version detection is broken
-
 LDFLAGS="%{__global_ldflags} -lpthread -ldl"
 
 CFLAGS="%{optflags} -Wno-error=format-security"
@@ -79,9 +82,9 @@ CXXFLAGS="%{optflags} -Wno-error=format-security"
 	-DLLVM_LIBDIR_SUFFIX= \
 %endif
 	\
-	-DPYTHON_EXECUTABLE:STRING=%{__python2} \
-	-DPYTHON_VERSION_MAJOR:STRING=$(%{__python2} -c "import sys; print(sys.version_info.major)") \
-	-DPYTHON_VERSION_MINOR:STRING=$(%{__python2} -c "import sys; print(sys.version_info.minor)") \
+	-DPYTHON_EXECUTABLE:STRING=%{__python3} \
+	-DPYTHON_VERSION_MAJOR:STRING=$(%{__python3} -c "import sys; print(sys.version_info.major)") \
+	-DPYTHON_VERSION_MINOR:STRING=$(%{__python3} -c "import sys; print(sys.version_info.minor)") \
 	-DLLVM_EXTERNAL_LIT=%{_bindir}/lit \
 	-DLLVM_LIT_ARGS="-sv \
 	--path %{_libdir}/llvm" \
@@ -97,12 +100,12 @@ rm -fv %{buildroot}%{_libdir}/*.a
 
 # python: fix binary libraries location
 liblldb=$(basename $(readlink -e %{buildroot}%{_libdir}/liblldb.so))
-ln -vsf "../../../${liblldb}" %{buildroot}%{python2_sitearch}/lldb/_lldb.so
-mv -v %{buildroot}%{python2_sitearch}/readline.so %{buildroot}%{python2_sitearch}/lldb/readline.so
-%py_byte_compile %{__python2} %{buildroot}%{python2_sitearch}/lldb
+ln -vsf "../../../${liblldb}" %{buildroot}%{python3_sitearch}/lldb/_lldb.so
+mv -v %{buildroot}%{python3_sitearch}/readline.so %{buildroot}%{python3_sitearch}/lldb/readline.so
+%py_byte_compile %{__python3} %{buildroot}%{python3_sitearch}/lldb
 
 # remove bundled six.py
-rm -f %{buildroot}%{python2_sitearch}/six.*
+rm -f %{buildroot}%{python3_sitearch}/six.*
 
 %ldconfig_scriptlets
 
@@ -115,10 +118,13 @@ rm -f %{buildroot}%{python2_sitearch}/six.*
 %{_includedir}/lldb
 %{_libdir}/*.so
 
-%files -n python2-lldb
-%{python2_sitearch}/lldb
+%files -n python3-lldb
+%{python3_sitearch}/lldb
 
 %changelog
+* Tue Mar 26 2019 sguelton@redhat.com - 8.0.0-2
+- Only depend on Python3
+
 * Wed Mar 20 2019 sguelton@redhat.com - 8.0.0-1
 - 8.0.0 final
 

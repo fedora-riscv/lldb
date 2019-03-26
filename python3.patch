@@ -1,0 +1,3770 @@
+diff -ru lldb-8.0.0.src.orig/examples/python/bsd.py lldb-8.0.0.src/examples/python/bsd.py
+--- lldb-8.0.0.src.orig/examples/python/bsd.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/bsd.py	2019-03-26 18:04:34.490674743 +0000
+@@ -391,18 +391,18 @@
+ 
+ 
+ def print_mtime_error(result, dmap_mtime, actual_mtime):
+-    print >>result, ("error: modification time in debug map (%#08.8x) doesn't "
++    print(("error: modification time in debug map (%#08.8x) doesn't "
+                      "match the .o file modification time (%#08.8x)" % (
+-                        dmap_mtime, actual_mtime))
++                        dmap_mtime, actual_mtime)), file=result)
+ 
+ 
+ def print_file_missing_error(result, path):
+-    print >>result, "error: file \"%s\" doesn't exist" % (path)
++    print("error: file \"%s\" doesn't exist" % (path), file=result)
+ 
+ 
+ def print_multiple_object_matches(result, object_name, mtime, matches):
+-    print >>result, ("error: multiple matches for object '%s' with with "
+-                     "modification time %#08.8x:" % (object_name, mtime))
++    print(("error: multiple matches for object '%s' with with "
++                     "modification time %#08.8x:" % (object_name, mtime)), file=result)
+     Archive.dump_header(f=result)
+     for match in matches:
+         match.dump(f=result, flat=True)
+@@ -411,15 +411,15 @@
+ def print_archive_object_error(result, object_name, mtime, archive):
+     matches = archive.find(object_name, f=result)
+     if len(matches) > 0:
+-        print >>result, ("error: no objects have a modification time that "
++        print(("error: no objects have a modification time that "
+                          "matches %#08.8x for '%s'. Potential matches:" % (
+-                            mtime, object_name))
++                            mtime, object_name)), file=result)
+         Archive.dump_header(f=result)
+         for match in matches:
+             match.dump(f=result, flat=True)
+     else:
+-        print >>result, "error: no object named \"%s\" found in archive:" % (
+-            object_name)
++        print("error: no object named \"%s\" found in archive:" % (
++            object_name), file=result)
+         Archive.dump_header(f=result)
+         for match in archive.objects:
+             match.dump(f=result, flat=True)
+@@ -496,13 +496,13 @@
+                 dmap_mtime = int(str(symbol).split('value = ')
+                                  [1].split(',')[0], 16)
+                 if not options.errors:
+-                    print >>result, '%s' % (path)
++                    print('%s' % (path), file=result)
+                 if os.path.exists(path):
+                     actual_mtime = int(os.stat(path).st_mtime)
+                     if dmap_mtime != actual_mtime:
+                         num_errors += 1
+                         if options.errors:
+-                            print >>result, '%s' % (path),
++                            print('%s' % (path), end=' ', file=result)
+                         print_mtime_error(result, dmap_mtime,
+                                           actual_mtime)
+                 elif path[-1] == ')':
+@@ -510,13 +510,13 @@
+                     if not archive_path and not object_name:
+                         num_errors += 1
+                         if options.errors:
+-                            print >>result, '%s' % (path),
++                            print('%s' % (path), end=' ', file=result)
+                         print_file_missing_error(path)
+                         continue
+                     if not os.path.exists(archive_path):
+                         num_errors += 1
+                         if options.errors:
+-                            print >>result, '%s' % (path),
++                            print('%s' % (path), end=' ', file=result)
+                         print_file_missing_error(archive_path)
+                         continue
+                     if archive_path in archives:
+@@ -527,30 +527,30 @@
+                     matches = archive.find(object_name, dmap_mtime)
+                     num_matches = len(matches)
+                     if num_matches == 1:
+-                        print >>result, '1 match'
++                        print('1 match', file=result)
+                         obj = matches[0]
+                         if obj.date != dmap_mtime:
+                             num_errors += 1
+                             if options.errors:
+-                                print >>result, '%s' % (path),
++                                print('%s' % (path), end=' ', file=result)
+                             print_mtime_error(result, dmap_mtime, obj.date)
+                     elif num_matches == 0:
+                         num_errors += 1
+                         if options.errors:
+-                            print >>result, '%s' % (path),
++                            print('%s' % (path), end=' ', file=result)
+                         print_archive_object_error(result, object_name,
+                                                    dmap_mtime, archive)
+                     elif num_matches > 1:
+                         num_errors += 1
+                         if options.errors:
+-                            print >>result, '%s' % (path),
++                            print('%s' % (path), end=' ', file=result)
+                         print_multiple_object_matches(result,
+                                                       object_name,
+                                                       dmap_mtime, matches)
+             if num_errors > 0:
+-                print >>result, "%u errors found" % (num_errors)
++                print("%u errors found" % (num_errors), file=result)
+             else:
+-                print >>result, "No errors detected in debug map"
++                print("No errors detected in debug map", file=result)
+ 
+ 
+ def __lldb_init_module(debugger, dict):
+diff -ru lldb-8.0.0.src.orig/examples/python/cmdtemplate.py lldb-8.0.0.src/examples/python/cmdtemplate.py
+--- lldb-8.0.0.src.orig/examples/python/cmdtemplate.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/cmdtemplate.py	2019-03-26 18:04:33.818665159 +0000
+@@ -124,7 +124,7 @@
+             options.inscope)
+         variables_count = variables_list.GetSize()
+         if variables_count == 0:
+-            print >> result, "no variables here"
++            print("no variables here", file=result)
+             return
+         total_size = 0
+         for i in range(0, variables_count):
+@@ -132,9 +132,9 @@
+             variable_type = variable.GetType()
+             total_size = total_size + variable_type.GetByteSize()
+             average_size = float(total_size) / variables_count
+-            print >>result, ("Your frame has %d variables. Their total size "
++            print(("Your frame has %d variables. Their total size "
+                              "is %d bytes. The average size is %f bytes") % (
+-                                    variables_count, total_size, average_size)
++                                    variables_count, total_size, average_size), file=result)
+         # not returning anything is akin to returning success
+ 
+ 
+diff -ru lldb-8.0.0.src.orig/examples/python/crashlog.py lldb-8.0.0.src/examples/python/crashlog.py
+--- lldb-8.0.0.src.orig/examples/python/crashlog.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/crashlog.py	2019-03-26 18:04:38.770735789 +0000
+@@ -26,7 +26,7 @@
+ #   PYTHONPATH=/path/to/LLDB.framework/Resources/Python ./crashlog.py ~/Library/Logs/DiagnosticReports/a.crash
+ #----------------------------------------------------------------------
+ 
+-import commands
++import subprocess
+ import cmd
+ import datetime
+ import glob
+@@ -51,7 +51,7 @@
+     platform_system = platform.system()
+     if platform_system == 'Darwin':
+         # On Darwin, try the currently selected Xcode directory
+-        xcode_dir = commands.getoutput("xcode-select --print-path")
++        xcode_dir = subprocess.getoutput("xcode-select --print-path")
+         if xcode_dir:
+             lldb_python_dirs.append(
+                 os.path.realpath(
+@@ -71,11 +71,11 @@
+                 except ImportError:
+                     pass
+                 else:
+-                    print 'imported lldb from: "%s"' % (lldb_python_dir)
++                    print('imported lldb from: "%s"' % (lldb_python_dir))
+                     success = True
+                     break
+     if not success:
+-        print "error: couldn't locate the 'lldb' module, please set PYTHONPATH correctly"
++        print("error: couldn't locate the 'lldb' module, please set PYTHONPATH correctly")
+         sys.exit(1)
+ 
+ from lldb.utils import symbolication
+@@ -113,17 +113,17 @@
+ 
+         def dump(self, prefix):
+             if self.app_specific_backtrace:
+-                print "%Application Specific Backtrace[%u] %s" % (prefix, self.index, self.reason)
++                print("%Application Specific Backtrace[%u] %s" % (prefix, self.index, self.reason))
+             else:
+-                print "%sThread[%u] %s" % (prefix, self.index, self.reason)
++                print("%sThread[%u] %s" % (prefix, self.index, self.reason))
+             if self.frames:
+-                print "%s  Frames:" % (prefix)
++                print("%s  Frames:" % (prefix))
+                 for frame in self.frames:
+                     frame.dump(prefix + '    ')
+             if self.registers:
+-                print "%s  Registers:" % (prefix)
+-                for reg in self.registers.keys():
+-                    print "%s    %-5s = %#16.16x" % (prefix, reg, self.registers[reg])
++                print("%s  Registers:" % (prefix))
++                for reg in list(self.registers.keys()):
++                    print("%s    %-5s = %#16.16x" % (prefix, reg, self.registers[reg]))
+ 
+         def dump_symbolicated(self, crash_log, options):
+             this_thread_crashed = self.app_specific_backtrace
+@@ -132,7 +132,7 @@
+                 if options.crashed_only and this_thread_crashed == False:
+                     return
+ 
+-            print "%s" % self
++            print("%s" % self)
+             #prev_frame_index = -1
+             display_frame_idx = -1
+             for frame_idx, frame in enumerate(self.frames):
+@@ -151,7 +151,7 @@
+                     symbolicated_frame_address_idx = 0
+                     for symbolicated_frame_address in symbolicated_frame_addresses:
+                         display_frame_idx += 1
+-                        print '[%3u] %s' % (frame_idx, symbolicated_frame_address)
++                        print('[%3u] %s' % (frame_idx, symbolicated_frame_address))
+                         if (options.source_all or self.did_crash(
+                         )) and display_frame_idx < options.source_frames and options.source_context:
+                             source_context = options.source_context
+@@ -166,12 +166,12 @@
+                                     # Indent the source a bit
+                                     indent_str = '    '
+                                     join_str = '\n' + indent_str
+-                                    print '%s%s' % (indent_str, join_str.join(source_text.split('\n')))
++                                    print('%s%s' % (indent_str, join_str.join(source_text.split('\n'))))
+                         if symbolicated_frame_address_idx == 0:
+                             if disassemble:
+                                 instructions = symbolicated_frame_address.get_instructions()
+                                 if instructions:
+-                                    print
++                                    print()
+                                     symbolication.disassemble_instructions(
+                                         crash_log.get_target(),
+                                         instructions,
+@@ -179,10 +179,10 @@
+                                         options.disassemble_before,
+                                         options.disassemble_after,
+                                         frame.index > 0)
+-                                    print
++                                    print()
+                         symbolicated_frame_address_idx += 1
+                 else:
+-                    print frame
++                    print(frame)
+ 
+         def add_ident(self, ident):
+             if ident not in self.idents:
+@@ -216,13 +216,13 @@
+                 return "[%3u] 0x%16.16x" % (self.index, self.pc)
+ 
+         def dump(self, prefix):
+-            print "%s%s" % (prefix, str(self))
++            print("%s%s" % (prefix, str(self)))
+ 
+     class DarwinImage(symbolication.Image):
+         """Class that represents a binary images in a darwin crash log"""
+         dsymForUUIDBinary = os.path.expanduser('~rc/bin/dsymForUUID')
+         if not os.path.exists(dsymForUUIDBinary):
+-            dsymForUUIDBinary = commands.getoutput('which dsymForUUID')
++            dsymForUUIDBinary = subprocess.getoutput('which dsymForUUID')
+ 
+         dwarfdump_uuid_regex = re.compile(
+             'UUID: ([-0-9a-fA-F]+) \(([^\(]+)\) .*')
+@@ -245,7 +245,7 @@
+             self.version = version
+ 
+         def find_matching_slice(self):
+-            dwarfdump_cmd_output = commands.getoutput(
++            dwarfdump_cmd_output = subprocess.getoutput(
+                 'dwarfdump --uuid "%s"' % self.path)
+             self_uuid = self.get_uuid()
+             for line in dwarfdump_cmd_output.splitlines():
+@@ -259,8 +259,8 @@
+                         return True
+             if not self.resolved_path:
+                 self.unavailable = True
+-                print("error\n    error: unable to locate '%s' with UUID %s"
+-                      % (self.path, uuid_str))
++                print(("error\n    error: unable to locate '%s' with UUID %s"
++                      % (self.path, uuid_str)))
+                 return False
+ 
+         def locate_module_and_debug_symbols(self):
+@@ -270,16 +270,16 @@
+             # Mark this as resolved so we don't keep trying
+             self.resolved = True
+             uuid_str = self.get_normalized_uuid_string()
+-            print 'Getting symbols for %s %s...' % (uuid_str, self.path),
++            print('Getting symbols for %s %s...' % (uuid_str, self.path), end=' ')
+             if os.path.exists(self.dsymForUUIDBinary):
+                 dsym_for_uuid_command = '%s %s' % (
+                     self.dsymForUUIDBinary, uuid_str)
+-                s = commands.getoutput(dsym_for_uuid_command)
++                s = subprocess.getoutput(dsym_for_uuid_command)
+                 if s:
+                     try:
+                         plist_root = plistlib.readPlistFromString(s)
+                     except:
+-                        print("Got exception: ", sys.exc_value, " handling dsymForUUID output: \n", s) 
++                        print(("Got exception: ", sys.exc_info()[1], " handling dsymForUUID output: \n", s)) 
+                         raise
+                     if plist_root:
+                         plist = plist_root[uuid_str]
+@@ -303,7 +303,7 @@
+                         ["/usr/bin/mdfind",
+                          "com_apple_xcode_dsym_uuids == %s"%uuid_str])[:-1]
+                     if dsym and os.path.exists(dsym):
+-                        print('falling back to binary inside "%s"'%dsym)
++                        print(('falling back to binary inside "%s"'%dsym))
+                         self.symfile = dsym
+                         dwarf_dir = os.path.join(dsym, 'Contents/Resources/DWARF')
+                         for filename in os.listdir(dwarf_dir):
+@@ -315,7 +315,7 @@
+                     pass
+             if (self.resolved_path and os.path.exists(self.resolved_path)) or (
+                     self.path and os.path.exists(self.path)):
+-                print 'ok'
++                print('ok')
+                 # if self.resolved_path:
+                 #     print '  exe = "%s"' % self.resolved_path
+                 # if self.symfile:
+@@ -471,7 +471,7 @@
+                     thread.frames.append(CrashLog.Frame(int(frame_match.group(1)), int(
+                         frame_match.group(3), 0), frame_match.group(4)))
+                 else:
+-                    print 'error: frame regex failed for line: "%s"' % line
++                    print('error: frame regex failed for line: "%s"' % line)
+             elif parse_mode == PARSE_MODE_IMAGES:
+                 image_match = self.image_regex_uuid.search(line)
+                 if image_match:
+@@ -484,7 +484,7 @@
+                                                  uuid.UUID(img_uuid), img_path)
+                     self.images.append(image)
+                 else:
+-                    print "error: image regex failed for: %s" % line
++                    print("error: image regex failed for: %s" % line)
+ 
+             elif parse_mode == PARSE_MODE_THREGS:
+                 stripped_line = line.strip()
+@@ -502,15 +502,15 @@
+         f.close()
+ 
+     def dump(self):
+-        print "Crash Log File: %s" % (self.path)
++        print("Crash Log File: %s" % (self.path))
+         if self.backtraces:
+-            print "\nApplication Specific Backtraces:"
++            print("\nApplication Specific Backtraces:")
+             for thread in self.backtraces:
+                 thread.dump('  ')
+-        print "\nThreads:"
++        print("\nThreads:")
+         for thread in self.threads:
+             thread.dump('  ')
+-        print "\nImages:"
++        print("\nImages:")
+         for image in self.images:
+             image.dump('  ')
+ 
+@@ -533,7 +533,7 @@
+                 return self.target
+             # We weren't able to open the main executable as, but we can still
+             # symbolicate
+-            print 'crashlog.create_target()...2'
++            print('crashlog.create_target()...2')
+             if self.idents:
+                 for ident in self.idents:
+                     image = self.find_image_with_identifier(ident)
+@@ -541,13 +541,13 @@
+                         self.target = image.create_target()
+                         if self.target:
+                             return self.target  # success
+-            print 'crashlog.create_target()...3'
++            print('crashlog.create_target()...3')
+             for image in self.images:
+                 self.target = image.create_target()
+                 if self.target:
+                     return self.target  # success
+-            print 'crashlog.create_target()...4'
+-            print 'error: unable to locate any executables from the crash log'
++            print('crashlog.create_target()...4')
++            print('error: unable to locate any executables from the crash log')
+         return self.target
+ 
+     def get_target(self):
+@@ -555,7 +555,7 @@
+ 
+ 
+ def usage():
+-    print "Usage: lldb-symbolicate.py [-n name] executable-image"
++    print("Usage: lldb-symbolicate.py [-n name] executable-image")
+     sys.exit(0)
+ 
+ 
+@@ -572,7 +572,7 @@
+ 
+     def default(self, line):
+         '''Catch all for unknown command, which will exit the interpreter.'''
+-        print "uknown command: %s" % line
++        print("uknown command: %s" % line)
+         return True
+ 
+     def do_q(self, line):
+@@ -602,7 +602,7 @@
+                 if idx < len(self.crash_logs):
+                     SymbolicateCrashLog(self.crash_logs[idx], options)
+                 else:
+-                    print 'error: crash log index %u is out of range' % (idx)
++                    print('error: crash log index %u is out of range' % (idx))
+         else:
+             # No arguments, symbolicate all crash logs using the options
+             # provided
+@@ -613,9 +613,9 @@
+         '''Dump a list of all crash logs that are currently loaded.
+ 
+         USAGE: list'''
+-        print '%u crash logs are loaded:' % len(self.crash_logs)
++        print('%u crash logs are loaded:' % len(self.crash_logs))
+         for (crash_log_idx, crash_log) in enumerate(self.crash_logs):
+-            print '[%u] = %s' % (crash_log_idx, crash_log.path)
++            print('[%u] = %s' % (crash_log_idx, crash_log.path))
+ 
+     def do_image(self, line):
+         '''Dump information about one or more binary images in the crash log given an image basename, or all images if no arguments are provided.'''
+@@ -645,22 +645,22 @@
+                         if fullpath_search:
+                             if image.get_resolved_path() == image_path:
+                                 matches_found += 1
+-                                print '[%u] ' % (crash_log_idx), image
++                                print('[%u] ' % (crash_log_idx), image)
+                         else:
+                             image_basename = image.get_resolved_path_basename()
+                             if image_basename == image_path:
+                                 matches_found += 1
+-                                print '[%u] ' % (crash_log_idx), image
++                                print('[%u] ' % (crash_log_idx), image)
+                     if matches_found == 0:
+                         for (image_idx, image) in enumerate(crash_log.images):
+                             resolved_image_path = image.get_resolved_path()
+                             if resolved_image_path and string.find(
+                                     image.get_resolved_path(), image_path) >= 0:
+-                                print '[%u] ' % (crash_log_idx), image
++                                print('[%u] ' % (crash_log_idx), image)
+         else:
+             for crash_log in self.crash_logs:
+                 for (image_idx, image) in enumerate(crash_log.images):
+-                    print '[%u] %s' % (image_idx, image)
++                    print('[%u] %s' % (image_idx, image))
+         return False
+ 
+ 
+@@ -675,12 +675,12 @@
+         # print 'crash_log_file = "%s"' % crash_log_file
+         crash_log = CrashLog(crash_log_file)
+         if crash_log.error:
+-            print crash_log.error
++            print(crash_log.error)
+             continue
+         if options.debug:
+             crash_log.dump()
+         if not crash_log.images:
+-            print 'error: no images in crash log "%s"' % (crash_log)
++            print('error: no images in crash log "%s"' % (crash_log))
+             continue
+         else:
+             crash_logs.append(crash_log)
+@@ -736,7 +736,7 @@
+                        (datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+         out_file.write(
+             'OS Version:      Mac OS X %s (%s)\n' %
+-            (platform.mac_ver()[0], commands.getoutput('sysctl -n kern.osversion')))
++            (platform.mac_ver()[0], subprocess.getoutput('sysctl -n kern.osversion')))
+         out_file.write('Report Version:  9\n')
+         for thread_idx in range(process.num_threads):
+             thread = process.thread[thread_idx]
+@@ -808,21 +808,21 @@
+ 
+ def SymbolicateCrashLog(crash_log, options):
+     if crash_log.error:
+-        print crash_log.error
++        print(crash_log.error)
+         return
+     if options.debug:
+         crash_log.dump()
+     if not crash_log.images:
+-        print 'error: no images in crash log'
++        print('error: no images in crash log')
+         return
+ 
+     if options.dump_image_list:
+-        print "Binary Images:"
++        print("Binary Images:")
+         for image in crash_log.images:
+             if options.verbose:
+-                print image.debug_dump()
++                print(image.debug_dump())
+             else:
+-                print image
++                print(image)
+ 
+     target = crash_log.create_target()
+     if not target:
+@@ -845,7 +845,7 @@
+                             for image in images:
+                                 images_to_load.append(image)
+                         else:
+-                            print 'error: can\'t find image for identifier "%s"' % ident
++                            print('error: can\'t find image for identifier "%s"' % ident)
+         else:
+             for ident in crash_log.idents:
+                 images = crash_log.find_images_with_identifier(ident)
+@@ -853,13 +853,13 @@
+                     for image in images:
+                         images_to_load.append(image)
+                 else:
+-                    print 'error: can\'t find image for identifier "%s"' % ident
++                    print('error: can\'t find image for identifier "%s"' % ident)
+ 
+     for image in images_to_load:
+         if image not in loaded_images:
+             err = image.add_module(target)
+             if err:
+-                print err
++                print(err)
+             else:
+                 # print 'loaded %s' % image
+                 loaded_images.append(image)
+@@ -867,11 +867,11 @@
+     if crash_log.backtraces:
+         for thread in crash_log.backtraces:
+             thread.dump_symbolicated(crash_log, options)
+-            print
++            print()
+ 
+     for thread in crash_log.threads:
+         thread.dump_symbolicated(crash_log, options)
+-        print
++        print()
+ 
+ 
+ def CreateSymbolicateCrashLogOptions(
+@@ -998,12 +998,12 @@
+         return
+ 
+     if options.debug:
+-        print 'command_args = %s' % command_args
+-        print 'options', options
+-        print 'args', args
++        print('command_args = %s' % command_args)
++        print('options', options)
++        print('args', args)
+ 
+     if options.debug_delay > 0:
+-        print "Waiting %u seconds for debugger to attach..." % options.debug_delay
++        print("Waiting %u seconds for debugger to attach..." % options.debug_delay)
+         time.sleep(options.debug_delay)
+     error = lldb.SBError()
+ 
+@@ -1024,4 +1024,4 @@
+         'command script add -f lldb.macosx.crashlog.Symbolicate crashlog')
+     lldb.debugger.HandleCommand(
+         'command script add -f lldb.macosx.crashlog.save_crashlog save_crashlog')
+-    print '"crashlog" and "save_crashlog" command installed, use the "--help" option for detailed help'
++    print('"crashlog" and "save_crashlog" command installed, use the "--help" option for detailed help')
+diff -ru lldb-8.0.0.src.orig/examples/python/delta.py lldb-8.0.0.src/examples/python/delta.py
+--- lldb-8.0.0.src.orig/examples/python/delta.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/delta.py	2019-03-26 18:04:27.285571978 +0000
+@@ -16,7 +16,7 @@
+ # available.
+ #----------------------------------------------------------------------
+ 
+-import commands
++import subprocess
+ import optparse
+ import os
+ import shlex
+@@ -94,9 +94,9 @@
+     handy when trying to figure out why some operation in the debugger is taking
+     a long time during a preset set of debugger commands.'''
+ 
+-    print '#----------------------------------------------------------------------'
+-    print "# Log file: '%s'" % file
+-    print '#----------------------------------------------------------------------'
++    print('#----------------------------------------------------------------------')
++    print("# Log file: '%s'" % file)
++    print('#----------------------------------------------------------------------')
+ 
+     timestamp_regex = re.compile('(\s*)([1-9][0-9]+\.[0-9]+)([^0-9].*)$')
+ 
+@@ -114,10 +114,10 @@
+             else:
+                 base_time = curr_time
+ 
+-            print '%s%.6f %+.6f%s' % (match.group(1), curr_time - base_time, delta, match.group(3))
++            print('%s%.6f %+.6f%s' % (match.group(1), curr_time - base_time, delta, match.group(3)))
+             last_time = curr_time
+         else:
+-            print line
++            print(line)
+ 
+ 
+ if __name__ == '__main__':
+@@ -131,4 +131,4 @@
+         # Add any commands contained in this module to LLDB
+         lldb.debugger.HandleCommand(
+             'command script add -f delta.parse_time_log parse_time_log')
+-        print 'The "parse_time_log" command is now installed and ready for use, type "parse_time_log --help" for more information'
++        print('The "parse_time_log" command is now installed and ready for use, type "parse_time_log --help" for more information')
+diff -ru lldb-8.0.0.src.orig/examples/python/diagnose_nsstring.py lldb-8.0.0.src/examples/python/diagnose_nsstring.py
+--- lldb-8.0.0.src.orig/examples/python/diagnose_nsstring.py	2019-03-26 17:36:55.200323102 +0000
++++ lldb-8.0.0.src/examples/python/diagnose_nsstring.py	2019-03-26 18:04:27.003567956 +0000
+@@ -32,7 +32,7 @@
+                 if x < size - 2:
+                     data = data + ":"
+             except Exception as e:
+-                print e
++                print(e)
+     return data
+ 
+ 
+@@ -57,7 +57,7 @@
+         nsstring = frame.EvaluateExpression(command, options)
+     else:
+         nsstring = target.EvaluateExpression(command, options)
+-    print >>result, str(nsstring)
++    print(str(nsstring), file=result)
+     nsstring_address = nsstring.GetValueAsUnsigned(0)
+     if nsstring_address == 0:
+         return "unable to obtain the string - cannot proceed"
+@@ -103,7 +103,7 @@
+     expression = expression + "*(($__lldb__CFString*) %d)" % nsstring_address
+     # print expression
+     dumped = target.EvaluateExpression(expression, options)
+-    print >>result, str(dumped)
++    print(str(dumped), file=result)
+ 
+     little_endian = (target.byte_order == lldb.eByteOrderLittle)
+     ptr_size = target.addr_size
+@@ -119,8 +119,8 @@
+             lldb.eDynamicCanRunTarget).GetTypeName() == "NSPathStore2")
+     has_null = (info_bits & 8) == 8
+ 
+-    print >>result, "\nInfo=%d\nMutable=%s\nInline=%s\nExplicit=%s\nUnicode=%s\nSpecial=%s\nNull=%s\n" % \
+-        (info_bits, "yes" if is_mutable else "no", "yes" if is_inline else "no", "yes" if has_explicit_length else "no", "yes" if is_unicode else "no", "yes" if is_special else "no", "yes" if has_null else "no")
++    print("\nInfo=%d\nMutable=%s\nInline=%s\nExplicit=%s\nUnicode=%s\nSpecial=%s\nNull=%s\n" % \
++        (info_bits, "yes" if is_mutable else "no", "yes" if is_inline else "no", "yes" if has_explicit_length else "no", "yes" if is_unicode else "no", "yes" if is_special else "no", "yes" if has_null else "no"), file=result)
+ 
+     explicit_length_offset = 0
+     if not has_null and has_explicit_length and not is_special:
+@@ -135,13 +135,13 @@
+             explicit_length_offset = 0
+ 
+     if explicit_length_offset == 0:
+-        print >>result, "There is no explicit length marker - skipping this step\n"
++        print("There is no explicit length marker - skipping this step\n", file=result)
+     else:
+         explicit_length_offset = nsstring_address + explicit_length_offset
+         explicit_length = process.ReadUnsignedFromMemory(
+             explicit_length_offset, 4, error)
+-        print >>result, "Explicit length location is at 0x%x - read value is %d\n" % (
+-            explicit_length_offset, explicit_length)
++        print("Explicit length location is at 0x%x - read value is %d\n" % (
++            explicit_length_offset, explicit_length), file=result)
+ 
+     if is_mutable:
+         location = 2 * ptr_size + nsstring_address
+@@ -152,7 +152,7 @@
+         location = 2 * ptr_size + nsstring_address
+         if is_inline:
+             if not has_explicit_length:
+-                print >>result, "Unicode & Inline & !Explicit is a new combo - no formula for it"
++                print("Unicode & Inline & !Explicit is a new combo - no formula for it", file=result)
+             else:
+                 location += ptr_size
+         else:
+@@ -166,18 +166,18 @@
+     else:
+         location = 2 * ptr_size + nsstring_address
+         location = process.ReadPointerFromMemory(location, error)
+-    print >>result, "Expected data location: 0x%x\n" % (location)
+-    print >>result, "1K of data around location: %s\n" % read_memory(
+-        process, location, 1024)
+-    print >>result, "5K of data around string pointer: %s\n" % read_memory(
+-        process, nsstring_address, 1024 * 5)
++    print("Expected data location: 0x%x\n" % (location), file=result)
++    print("1K of data around location: %s\n" % read_memory(
++        process, location, 1024), file=result)
++    print("5K of data around string pointer: %s\n" % read_memory(
++        process, nsstring_address, 1024 * 5), file=result)
+ 
+ 
+ def __lldb_init_module(debugger, internal_dict):
+     debugger.HandleCommand(
+         "command script add -f %s.diagnose_nsstring_Command_Impl diagnose-nsstring" %
+         __name__)
+-    print 'The "diagnose-nsstring" command has been installed, type "help diagnose-nsstring" for detailed help.'
++    print('The "diagnose-nsstring" command has been installed, type "help diagnose-nsstring" for detailed help.')
+ 
+ __lldb_init_module(lldb.debugger, None)
+ __lldb_init_module = None
+diff -ru lldb-8.0.0.src.orig/examples/python/diagnose_unwind.py lldb-8.0.0.src/examples/python/diagnose_unwind.py
+--- lldb-8.0.0.src.orig/examples/python/diagnose_unwind.py	2019-03-26 17:36:55.200323102 +0000
++++ lldb-8.0.0.src/examples/python/diagnose_unwind.py	2019-03-26 18:04:28.628591134 +0000
+@@ -39,7 +39,7 @@
+                 module_description = '%s %s' % (
+                     module_filename, module_uuid_str)
+     except Exception:
+-        print '%2d: pc==0x%-*x fp==0x%-*x' % (frame_num, addr_width, addr_for_printing, addr_width, fp)
++        print('%2d: pc==0x%-*x fp==0x%-*x' % (frame_num, addr_width, addr_for_printing, addr_width, fp))
+         return
+ 
+     sym_ctx = target.ResolveSymbolContextForAddress(
+@@ -47,9 +47,9 @@
+     if sym_ctx.IsValid() and sym_ctx.GetSymbol().IsValid():
+         function_start = sym_ctx.GetSymbol().GetStartAddress().GetLoadAddress(target)
+         offset = addr - function_start
+-        print '%2d: pc==0x%-*x fp==0x%-*x %s %s + %d' % (frame_num, addr_width, addr_for_printing, addr_width, fp, module_description, sym_ctx.GetSymbol().GetName(), offset)
++        print('%2d: pc==0x%-*x fp==0x%-*x %s %s + %d' % (frame_num, addr_width, addr_for_printing, addr_width, fp, module_description, sym_ctx.GetSymbol().GetName(), offset))
+     else:
+-        print '%2d: pc==0x%-*x fp==0x%-*x %s' % (frame_num, addr_width, addr_for_printing, addr_width, fp, module_description)
++        print('%2d: pc==0x%-*x fp==0x%-*x %s' % (frame_num, addr_width, addr_for_printing, addr_width, fp, module_description))
+     return sbaddr.GetModule()
+ 
+ # A simple stack walk algorithm that follows the frame chain.
+@@ -78,7 +78,7 @@
+     this_module = backtrace_print_frame(
+         target, 0, cur_thread.GetFrameAtIndex(0).GetPC(), initial_fp)
+     print_stack_frame(process, initial_fp)
+-    print ""
++    print("")
+     if this_module is not None:
+         module_list.append(this_module)
+     if cur_thread.GetNumFrames() < 2:
+@@ -94,7 +94,7 @@
+         address_list.append(cur_pc)
+         this_module = backtrace_print_frame(target, frame_num, cur_pc, cur_fp)
+         print_stack_frame(process, cur_fp)
+-        print ""
++        print("")
+         if this_module is not None:
+             module_list.append(this_module)
+         frame_num = frame_num + 1
+@@ -119,7 +119,7 @@
+         cur_fp = next_fp
+     this_module = backtrace_print_frame(target, frame_num, cur_pc, cur_fp)
+     print_stack_frame(process, cur_fp)
+-    print ""
++    print("")
+     if this_module is not None:
+         module_list.append(this_module)
+     return [module_list, address_list]
+@@ -139,7 +139,7 @@
+                 addr + (i * addr_size), error)
+             outline += " 0x%x" % address
+             i += 1
+-        print outline
++        print(outline)
+     except Exception:
+         return
+ 
+@@ -180,39 +180,39 @@
+                 modules_seen = []
+                 addresses_seen = []
+ 
+-                print 'LLDB version %s' % debugger.GetVersionString()
+-                print 'Unwind diagnostics for thread %d' % thread.GetIndexID()
+-                print ""
+-                print "============================================================================================="
+-                print ""
+-                print "OS plugin setting:"
++                print('LLDB version %s' % debugger.GetVersionString())
++                print('Unwind diagnostics for thread %d' % thread.GetIndexID())
++                print("")
++                print("=============================================================================================")
++                print("")
++                print("OS plugin setting:")
+                 debugger.HandleCommand(
+                     "settings show target.process.python-os-plugin-path")
+-                print ""
+-                print "Live register context:"
++                print("")
++                print("Live register context:")
+                 thread.SetSelectedFrame(0)
+                 debugger.HandleCommand("register read")
+-                print ""
+-                print "============================================================================================="
+-                print ""
+-                print "lldb's unwind algorithm:"
+-                print ""
++                print("")
++                print("=============================================================================================")
++                print("")
++                print("lldb's unwind algorithm:")
++                print("")
+                 frame_num = 0
+                 for frame in thread.frames:
+                     if not frame.IsInlined():
+                         this_module = backtrace_print_frame(
+                             target, frame_num, frame.GetPC(), frame.GetFP())
+                         print_stack_frame(process, frame.GetFP())
+-                        print ""
++                        print("")
+                         if this_module is not None:
+                             modules_seen.append(this_module)
+                         addresses_seen.append(frame.GetPC())
+                         frame_num = frame_num + 1
+-                print ""
+-                print "============================================================================================="
+-                print ""
+-                print "Simple stack walk algorithm:"
+-                print ""
++                print("")
++                print("=============================================================================================")
++                print("")
++                print("Simple stack walk algorithm:")
++                print("")
+                 (module_list, address_list) = simple_backtrace(debugger)
+                 if module_list and module_list is not None:
+                     modules_seen += module_list
+@@ -220,11 +220,11 @@
+                     addresses_seen = set(addresses_seen)
+                     addresses_seen.update(set(address_list))
+ 
+-                print ""
+-                print "============================================================================================="
+-                print ""
+-                print "Modules seen in stack walks:"
+-                print ""
++                print("")
++                print("=============================================================================================")
++                print("")
++                print("Modules seen in stack walks:")
++                print("")
+                 modules_already_seen = set()
+                 for module in modules_seen:
+                     if module is not None and module.GetFileSpec().GetFilename() is not None:
+@@ -235,18 +235,18 @@
+                             modules_already_seen.add(
+                                 module.GetFileSpec().GetFilename())
+ 
+-                print ""
+-                print "============================================================================================="
+-                print ""
+-                print "Disassembly ofaddresses seen in stack walks:"
+-                print ""
++                print("")
++                print("=============================================================================================")
++                print("")
++                print("Disassembly ofaddresses seen in stack walks:")
++                print("")
+                 additional_addresses_to_disassemble = addresses_seen
+                 for frame in thread.frames:
+                     if not frame.IsInlined():
+-                        print "--------------------------------------------------------------------------------------"
+-                        print ""
+-                        print "Disassembly of %s, frame %d, address 0x%x" % (frame.GetFunctionName(), frame.GetFrameID(), frame.GetPC())
+-                        print ""
++                        print("--------------------------------------------------------------------------------------")
++                        print("")
++                        print("Disassembly of %s, frame %d, address 0x%x" % (frame.GetFunctionName(), frame.GetFrameID(), frame.GetPC()))
++                        print("")
+                         if target.triple[
+                                 0:6] == "x86_64" or target.triple[
+                                 0:4] == "i386":
+@@ -261,10 +261,10 @@
+                                 frame.GetPC())
+ 
+                 for address in list(additional_addresses_to_disassemble):
+-                    print "--------------------------------------------------------------------------------------"
+-                    print ""
+-                    print "Disassembly of 0x%x" % address
+-                    print ""
++                    print("--------------------------------------------------------------------------------------")
++                    print("")
++                    print("Disassembly of 0x%x" % address)
++                    print("")
+                     if target.triple[
+                             0:6] == "x86_64" or target.triple[
+                             0:4] == "i386":
+@@ -273,16 +273,16 @@
+                     else:
+                         debugger.HandleCommand('disassemble -a 0x%x' % address)
+ 
+-                print ""
+-                print "============================================================================================="
+-                print ""
++                print("")
++                print("=============================================================================================")
++                print("")
+                 additional_addresses_to_show_unwind = addresses_seen
+                 for frame in thread.frames:
+                     if not frame.IsInlined():
+-                        print "--------------------------------------------------------------------------------------"
+-                        print ""
+-                        print "Unwind instructions for %s, frame %d" % (frame.GetFunctionName(), frame.GetFrameID())
+-                        print ""
++                        print("--------------------------------------------------------------------------------------")
++                        print("")
++                        print("Unwind instructions for %s, frame %d" % (frame.GetFunctionName(), frame.GetFrameID()))
++                        print("")
+                         debugger.HandleCommand(
+                             'image show-unwind -a "0x%x"' % frame.GetPC())
+                         if frame.GetPC() in additional_addresses_to_show_unwind:
+@@ -290,10 +290,10 @@
+                                 frame.GetPC())
+ 
+                 for address in list(additional_addresses_to_show_unwind):
+-                    print "--------------------------------------------------------------------------------------"
+-                    print ""
+-                    print "Unwind instructions for 0x%x" % address
+-                    print ""
++                    print("--------------------------------------------------------------------------------------")
++                    print("")
++                    print("Unwind instructions for 0x%x" % address)
++                    print("")
+                     debugger.HandleCommand(
+                         'image show-unwind -a "0x%x"' % address)
+ 
+@@ -310,4 +310,4 @@
+ lldb.debugger.HandleCommand(
+     'command script add -f %s.diagnose_unwind diagnose-unwind' %
+     __name__)
+-print 'The "diagnose-unwind" command has been installed, type "help diagnose-unwind" for detailed help.'
++print('The "diagnose-unwind" command has been installed, type "help diagnose-unwind" for detailed help.')
+diff -ru lldb-8.0.0.src.orig/examples/python/dict_utils.py lldb-8.0.0.src/examples/python/dict_utils.py
+--- lldb-8.0.0.src.orig/examples/python/dict_utils.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/dict_utils.py	2019-03-26 18:04:36.288700388 +0000
+@@ -10,14 +10,14 @@
+ 
+     def get_keys_for_value(self, value, fail_value=None):
+         """find the key(s) as a list given a value"""
+-        list_result = [item[0] for item in self.items() if item[1] == value]
++        list_result = [item[0] for item in list(self.items()) if item[1] == value]
+         if len(list_result) > 0:
+             return list_result
+         return fail_value
+ 
+     def get_first_key_for_value(self, value, fail_value=None):
+         """return the first key of this dictionary given the value"""
+-        list_result = [item[0] for item in self.items() if item[1] == value]
++        list_result = [item[0] for item in list(self.items()) if item[1] == value]
+         if len(list_result) > 0:
+             return list_result[0]
+         return fail_value
+diff -ru lldb-8.0.0.src.orig/examples/python/disasm-stress-test.py lldb-8.0.0.src/examples/python/disasm-stress-test.py
+--- lldb-8.0.0.src.orig/examples/python/disasm-stress-test.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/disasm-stress-test.py	2019-03-26 18:04:28.285586241 +0000
+@@ -71,7 +71,7 @@
+     lldb_framework_path = GetLLDBFrameworkPath()
+ 
+     if lldb_framework_path is None:
+-        print "Couldn't find LLDB.framework"
++        print("Couldn't find LLDB.framework")
+         sys.exit(-1)
+ 
+     sys.path.append(lldb_framework_path + "/Resources/Python")
+@@ -86,13 +86,13 @@
+ debugger = lldb.SBDebugger.Create()
+ 
+ if debugger.IsValid() == False:
+-    print "Couldn't create an SBDebugger"
++    print("Couldn't create an SBDebugger")
+     sys.exit(-1)
+ 
+ target = debugger.CreateTargetWithFileAndArch(None, arg_ns.arch)
+ 
+ if target.IsValid() == False:
+-    print "Couldn't create an SBTarget for architecture " + arg_ns.arch
++    print("Couldn't create an SBTarget for architecture " + arg_ns.arch)
+     sys.exit(-1)
+ 
+ 
+@@ -103,8 +103,8 @@
+ 
+ def PrintByteArray(log_file, byte_array):
+     for byte in byte_array:
+-        print >>log_file, hex(byte) + " ",
+-    print >>log_file
++        print(hex(byte) + " ", end=' ', file=log_file)
++    print(file=log_file)
+ 
+ 
+ class SequentialInstructionProvider:
+@@ -119,7 +119,7 @@
+ 
+     def PrintCurrentState(self, ret):
+         ResetLogFile(self.m_log_file)
+-        print >>self.m_log_file, self.m_value
++        print(self.m_value, file=self.m_log_file)
+         PrintByteArray(self.m_log_file, ret)
+ 
+     def GetNextInstruction(self):
+@@ -138,7 +138,7 @@
+     def __iter__(self):
+         return self
+ 
+-    def next(self):
++    def __next__(self):
+         ret = self.GetNextInstruction()
+         if ret is None:
+             raise StopIteration
+@@ -166,7 +166,7 @@
+     def __iter__(self):
+         return self
+ 
+-    def next(self):
++    def __next__(self):
+         ret = self.GetNextInstruction()
+         if ret is None:
+             raise StopIteration
+@@ -215,16 +215,16 @@
+             remaining_time = float(
+                 total_num_instructions - num_instructions_logged) * (
+                 float(elapsed_time) / float(num_instructions_logged))
+-            print str(datetime.timedelta(seconds=remaining_time))
++            print(str(datetime.timedelta(seconds=remaining_time)))
+         num_instructions_logged = num_instructions_logged + 1
+     inst_list = target.GetInstructions(fake_address, inst_bytes)
+     if not inst_list.IsValid():
+-        print >>log_file, "Invalid instruction list"
++        print("Invalid instruction list", file=log_file)
+         continue
+     inst = inst_list.GetInstructionAtIndex(0)
+     if not inst.IsValid():
+-        print >>log_file, "Invalid instruction"
++        print("Invalid instruction", file=log_file)
+         continue
+     instr_output_stream = lldb.SBStream()
+     inst.GetDescription(instr_output_stream)
+-    print >>log_file, instr_output_stream.GetData()
++    print(instr_output_stream.GetData(), file=log_file)
+diff -ru lldb-8.0.0.src.orig/examples/python/disasm.py lldb-8.0.0.src/examples/python/disasm.py
+--- lldb-8.0.0.src.orig/examples/python/disasm.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/disasm.py	2019-03-26 18:04:36.008696394 +0000
+@@ -15,12 +15,12 @@
+ 
+ def disassemble_instructions(insts):
+     for i in insts:
+-        print i
++        print(i)
+ 
+ 
+ def usage():
+-    print "Usage: disasm.py [-n name] executable-image"
+-    print "       By default, it breaks at and disassembles the 'main' function."
++    print("Usage: disasm.py [-n name] executable-image")
++    print("       By default, it breaks at and disassembles the 'main' function.")
+     sys.exit(0)
+ 
+ if len(sys.argv) == 2:
+@@ -43,7 +43,7 @@
+ debugger.SetAsync(False)
+ 
+ # Create a target from a file and arch
+-print "Creating a target for '%s'" % exe
++print("Creating a target for '%s'" % exe)
+ 
+ target = debugger.CreateTargetWithFileAndArch(exe, lldb.LLDB_ARCH_DEFAULT)
+ 
+@@ -52,7 +52,7 @@
+     main_bp = target.BreakpointCreateByName(
+         fname, target.GetExecutable().GetFilename())
+ 
+-    print main_bp
++    print(main_bp)
+ 
+     # Launch the process. Since we specified synchronous mode, we won't return
+     # from this function until we hit the breakpoint at main
+@@ -62,24 +62,24 @@
+     if process:
+         # Print some simple process info
+         state = process.GetState()
+-        print process
++        print(process)
+         if state == lldb.eStateStopped:
+             # Get the first thread
+             thread = process.GetThreadAtIndex(0)
+             if thread:
+                 # Print some simple thread info
+-                print thread
++                print(thread)
+                 # Get the first frame
+                 frame = thread.GetFrameAtIndex(0)
+                 if frame:
+                     # Print some simple frame info
+-                    print frame
++                    print(frame)
+                     function = frame.GetFunction()
+                     # See if we have debug info (a function)
+                     if function:
+                         # We do have a function, print some info for the
+                         # function
+-                        print function
++                        print(function)
+                         # Now get all instructions for this function and print
+                         # them
+                         insts = function.GetInstructions(target)
+@@ -91,35 +91,35 @@
+                         if symbol:
+                             # We do have a symbol, print some info for the
+                             # symbol
+-                            print symbol
++                            print(symbol)
+                             # Now get all instructions for this symbol and
+                             # print them
+                             insts = symbol.GetInstructions(target)
+                             disassemble_instructions(insts)
+ 
+                     registerList = frame.GetRegisters()
+-                    print "Frame registers (size of register set = %d):" % registerList.GetSize()
++                    print("Frame registers (size of register set = %d):" % registerList.GetSize())
+                     for value in registerList:
+                         # print value
+-                        print "%s (number of children = %d):" % (value.GetName(), value.GetNumChildren())
++                        print("%s (number of children = %d):" % (value.GetName(), value.GetNumChildren()))
+                         for child in value:
+-                            print "Name: ", child.GetName(), " Value: ", child.GetValue()
++                            print("Name: ", child.GetName(), " Value: ", child.GetValue())
+ 
+-            print "Hit the breakpoint at main, enter to continue and wait for program to exit or 'Ctrl-D'/'quit' to terminate the program"
++            print("Hit the breakpoint at main, enter to continue and wait for program to exit or 'Ctrl-D'/'quit' to terminate the program")
+             next = sys.stdin.readline()
+             if not next or next.rstrip('\n') == 'quit':
+-                print "Terminating the inferior process..."
++                print("Terminating the inferior process...")
+                 process.Kill()
+             else:
+                 # Now continue to the program exit
+                 process.Continue()
+                 # When we return from the above function we will hopefully be at the
+                 # program exit. Print out some process info
+-                print process
++                print(process)
+         elif state == lldb.eStateExited:
+-            print "Didn't hit the breakpoint at main, program has exited..."
++            print("Didn't hit the breakpoint at main, program has exited...")
+         else:
+-            print "Unexpected process state: %s, killing process..." % debugger.StateAsCString(state)
++            print("Unexpected process state: %s, killing process..." % debugger.StateAsCString(state))
+             process.Kill()
+ 
+ 
+diff -ru lldb-8.0.0.src.orig/examples/python/file_extract.py lldb-8.0.0.src/examples/python/file_extract.py
+--- lldb-8.0.0.src.orig/examples/python/file_extract.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/file_extract.py	2019-03-26 18:04:26.709563763 +0000
+@@ -29,7 +29,7 @@
+         elif b == '<' or b == '>' or b == '@' or b == '=':
+             self.byte_order = b
+         else:
+-            print "error: invalid byte order specified: '%s'" % b
++            print("error: invalid byte order specified: '%s'" % b)
+ 
+     def is_in_memory(self):
+         return False
+diff -ru lldb-8.0.0.src.orig/examples/python/gdb_disassemble.py lldb-8.0.0.src/examples/python/gdb_disassemble.py
+--- lldb-8.0.0.src.orig/examples/python/gdb_disassemble.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/gdb_disassemble.py	2019-03-26 18:04:29.914609476 +0000
+@@ -16,11 +16,11 @@
+         inst_offset = inst_addr - start_addr
+         comment = inst.comment
+         if comment:
+-            print "<%s + %-4u> 0x%x %8s  %s ; %s" % (name, inst_offset, inst_addr, inst.mnemonic, inst.operands, comment)
++            print("<%s + %-4u> 0x%x %8s  %s ; %s" % (name, inst_offset, inst_addr, inst.mnemonic, inst.operands, comment))
+         else:
+-            print "<%s + %-4u> 0x%x %8s  %s" % (name, inst_offset, inst_addr, inst.mnemonic, inst.operands)
++            print("<%s + %-4u> 0x%x %8s  %s" % (name, inst_offset, inst_addr, inst.mnemonic, inst.operands))
+ 
+ # Install the command when the module gets imported
+ lldb.debugger.HandleCommand(
+     'command script add -f gdb_disassemble.disassemble gdb-disassemble')
+-print 'Installed "gdb-disassemble" command for disassembly'
++print('Installed "gdb-disassemble" command for disassembly')
+diff -ru lldb-8.0.0.src.orig/examples/python/gdbremote.py lldb-8.0.0.src/examples/python/gdbremote.py
+--- lldb-8.0.0.src.orig/examples/python/gdbremote.py	2019-03-26 17:36:55.200323102 +0000
++++ lldb-8.0.0.src/examples/python/gdbremote.py	2019-03-26 18:04:35.693691902 +0000
+@@ -17,7 +17,7 @@
+ #----------------------------------------------------------------------
+ 
+ import binascii
+-import commands
++import subprocess
+ import json
+ import math
+ import optparse
+@@ -299,7 +299,7 @@
+             options.symbolicator = lldb.utils.symbolication.Symbolicator()
+             options.symbolicator.target = lldb.target
+         else:
+-            print "error: can't symbolicate without a target"
++            print("error: can't symbolicate without a target")
+ 
+     if not g_log_file:
+         result.PutCString(
+@@ -314,7 +314,7 @@
+         else:
+             result.PutCString(usage)
+     else:
+-        print 'error: the GDB packet log file "%s" does not exist' % g_log_file
++        print('error: the GDB packet log file "%s" does not exist' % g_log_file)
+ 
+ 
+ def is_hex_byte(str):
+@@ -392,7 +392,7 @@
+     def __str__(self):
+         '''Dump the register info key/value pairs'''
+         s = ''
+-        for key in self.info.keys():
++        for key in list(self.info.keys()):
+             if s:
+                 s += ', '
+             s += "%s=%s " % (key, self.info[key])
+@@ -584,11 +584,11 @@
+ def cmd_qThreadStopInfo(options, cmd, args):
+     packet = Packet(args)
+     tid = packet.get_hex_uint('big')
+-    print "get_thread_stop_info  (tid = 0x%x)" % (tid)
++    print("get_thread_stop_info  (tid = 0x%x)" % (tid))
+ 
+ 
+ def cmd_stop_reply(options, cmd, args):
+-    print "get_last_stop_info()"
++    print("get_last_stop_info()")
+     return False
+ 
+ 
+@@ -611,69 +611,69 @@
+             elif key == 'jthreads' or key == 'jstopinfo':
+                 key_value_pair[1] = binascii.unhexlify(key_value_pair[1])
+         key_value_pairs.insert(0, ['signal', signo])
+-        print 'stop_reply():'
++        print('stop_reply():')
+         dump_key_value_pairs(key_value_pairs)
+     elif stop_type == 'W':
+         exit_status = packet.get_hex_uint8()
+-        print 'stop_reply(): exit (status=%i)' % exit_status
++        print('stop_reply(): exit (status=%i)' % exit_status)
+     elif stop_type == 'O':
+-        print 'stop_reply(): stdout = "%s"' % packet.str
++        print('stop_reply(): stdout = "%s"' % packet.str)
+ 
+ 
+ def cmd_unknown_packet(options, cmd, args):
+     if args:
+-        print "cmd: %s, args: %s", cmd, args
++        print("cmd: %s, args: %s", cmd, args)
+     else:
+-        print "cmd: %s", cmd
++        print("cmd: %s", cmd)
+     return False
+ 
+ 
+ def cmd_qSymbol(options, cmd, args):
+     if args == ':':
+-        print 'ready to serve symbols'
++        print('ready to serve symbols')
+     else:
+         packet = Packet(args)
+         symbol_addr = packet.get_hex_uint('big')
+         if symbol_addr is None:
+             if packet.skip_exact_string(':'):
+                 symbol_name = packet.get_hex_ascii_str()
+-                print 'lookup_symbol("%s") -> symbol not available yet' % (symbol_name)
++                print('lookup_symbol("%s") -> symbol not available yet' % (symbol_name))
+             else:
+-                print 'error: bad command format'
++                print('error: bad command format')
+         else:
+             if packet.skip_exact_string(':'):
+                 symbol_name = packet.get_hex_ascii_str()
+-                print 'lookup_symbol("%s") -> 0x%x' % (symbol_name, symbol_addr)
++                print('lookup_symbol("%s") -> 0x%x' % (symbol_name, symbol_addr))
+             else:
+-                print 'error: bad command format'
++                print('error: bad command format')
+ 
+ def cmd_QSetWithHexString(options, cmd, args):
+-    print '%s("%s")' % (cmd[:-1], binascii.unhexlify(args))
++    print('%s("%s")' % (cmd[:-1], binascii.unhexlify(args)))
+ 
+ def cmd_QSetWithString(options, cmd, args):
+-    print '%s("%s")' % (cmd[:-1], args)
++    print('%s("%s")' % (cmd[:-1], args))
+ 
+ def cmd_QSetWithUnsigned(options, cmd, args):
+-    print '%s(%i)' % (cmd[:-1], int(args))
++    print('%s(%i)' % (cmd[:-1], int(args)))
+ 
+ def rsp_qSymbol(options, cmd, cmd_args, rsp):
+     if len(rsp) == 0:
+-        print "Unsupported"
++        print("Unsupported")
+     else:
+         if rsp == "OK":
+-            print "No more symbols to lookup"
++            print("No more symbols to lookup")
+         else:
+             packet = Packet(rsp)
+             if packet.skip_exact_string("qSymbol:"):
+                 symbol_name = packet.get_hex_ascii_str()
+-                print 'lookup_symbol("%s")' % (symbol_name)
++                print('lookup_symbol("%s")' % (symbol_name))
+             else:
+-                print 'error: response string should start with "qSymbol:": respnse is "%s"' % (rsp)
++                print('error: response string should start with "qSymbol:": respnse is "%s"' % (rsp))
+ 
+ 
+ def cmd_qXfer(options, cmd, args):
+     # $qXfer:features:read:target.xml:0,1ffff#14
+-    print "read target special data %s" % (args)
++    print("read target special data %s" % (args))
+     return True
+ 
+ 
+@@ -710,12 +710,12 @@
+                                     reg_info.info[
+                                         'bitsize'] = reg_element.attrib['bitsize']
+                                 g_register_infos.append(reg_info)
+-                        print 'XML for "%s":' % (data[2])
++                        print('XML for "%s":' % (data[2]))
+                         ET.dump(xml_root)
+ 
+ 
+ def cmd_A(options, cmd, args):
+-    print 'launch process:'
++    print('launch process:')
+     packet = Packet(args)
+     while True:
+         arg_len = packet.get_number()
+@@ -729,50 +729,50 @@
+         if not packet.skip_exact_string(','):
+             break
+         arg_value = packet.get_hex_ascii_str(arg_len)
+-        print 'argv[%u] = "%s"' % (arg_idx, arg_value)
++        print('argv[%u] = "%s"' % (arg_idx, arg_value))
+ 
+ 
+ def cmd_qC(options, cmd, args):
+-    print "query_current_thread_id()"
++    print("query_current_thread_id()")
+ 
+ 
+ def rsp_qC(options, cmd, cmd_args, rsp):
+     packet = Packet(rsp)
+     if packet.skip_exact_string("QC"):
+         tid = packet.get_thread_id()
+-        print "current_thread_id = %#x" % (tid)
++        print("current_thread_id = %#x" % (tid))
+     else:
+-        print "current_thread_id = old thread ID"
++        print("current_thread_id = old thread ID")
+ 
+ 
+ def cmd_query_packet(options, cmd, args):
+     if args:
+-        print "%s%s" % (cmd, args)
++        print("%s%s" % (cmd, args))
+     else:
+-        print "%s" % (cmd)
++        print("%s" % (cmd))
+     return False
+ 
+ 
+ def rsp_ok_error(rsp):
+-    print "rsp: ", rsp
++    print("rsp: ", rsp)
+ 
+ 
+ def rsp_ok_means_supported(options, cmd, cmd_args, rsp):
+     if rsp == 'OK':
+-        print "%s%s is supported" % (cmd, cmd_args)
++        print("%s%s is supported" % (cmd, cmd_args))
+     elif rsp == '':
+-        print "%s%s is not supported" % (cmd, cmd_args)
++        print("%s%s is not supported" % (cmd, cmd_args))
+     else:
+-        print "%s%s -> %s" % (cmd, cmd_args, rsp)
++        print("%s%s -> %s" % (cmd, cmd_args, rsp))
+ 
+ 
+ def rsp_ok_means_success(options, cmd, cmd_args, rsp):
+     if rsp == 'OK':
+-        print "success"
++        print("success")
+     elif rsp == '':
+-        print "%s%s is not supported" % (cmd, cmd_args)
++        print("%s%s is not supported" % (cmd, cmd_args))
+     else:
+-        print "%s%s -> %s" % (cmd, cmd_args, rsp)
++        print("%s%s -> %s" % (cmd, cmd_args, rsp))
+ 
+ 
+ def dump_key_value_pairs(key_value_pairs):
+@@ -786,42 +786,42 @@
+         value = key_value_pair[1]
+         unhex_value = get_hex_string_if_all_printable(value)
+         if unhex_value:
+-            print "%*s = %s (%s)" % (max_key_len, key, value, unhex_value)
++            print("%*s = %s (%s)" % (max_key_len, key, value, unhex_value))
+         else:
+-            print "%*s = %s" % (max_key_len, key, value)
++            print("%*s = %s" % (max_key_len, key, value))
+ 
+ 
+ def rsp_dump_key_value_pairs(options, cmd, cmd_args, rsp):
+     if rsp:
+-        print '%s response:' % (cmd)
++        print('%s response:' % (cmd))
+         packet = Packet(rsp)
+         key_value_pairs = packet.get_key_value_pairs()
+         dump_key_value_pairs(key_value_pairs)
+     else:
+-        print "not supported"
++        print("not supported")
+ 
+ 
+ def cmd_c(options, cmd, args):
+-    print "continue()"
++    print("continue()")
+     return False
+ 
+ 
+ def cmd_s(options, cmd, args):
+-    print "step()"
++    print("step()")
+     return False
+ 
+ 
+ def cmd_qSpeedTest(options, cmd, args):
+-    print("qSpeedTest: cmd='%s', args='%s'" % (cmd, args))
++    print(("qSpeedTest: cmd='%s', args='%s'" % (cmd, args)))
+ 
+ 
+ def rsp_qSpeedTest(options, cmd, cmd_args, rsp):
+-    print("qSpeedTest: rsp='%s' cmd='%s', args='%s'" % (rsp, cmd, args))
++    print(("qSpeedTest: rsp='%s' cmd='%s', args='%s'" % (rsp, cmd, args)))
+ 
+ 
+ def cmd_vCont(options, cmd, args):
+     if args == '?':
+-        print "%s: get supported extended continue modes" % (cmd)
++        print("%s: get supported extended continue modes" % (cmd))
+     else:
+         got_other_threads = 0
+         s = ''
+@@ -846,9 +846,9 @@
+             else:
+                 s += 'thread 0x%4.4x: %s' % (tid, action)
+         if got_other_threads:
+-            print "extended_continue (%s)" % (s)
++            print("extended_continue (%s)" % (s))
+         else:
+-            print "extended_continue (%s, other-threads: suspend)" % (s)
++            print("extended_continue (%s, other-threads: suspend)" % (s))
+     return False
+ 
+ 
+@@ -874,47 +874,47 @@
+                 s += 'stop'
+             # else:
+             #     s += 'unrecognized vCont mode: ', str(mode)
+-        print s
++        print(s)
+     elif rsp:
+         if rsp[0] == 'T' or rsp[0] == 'S' or rsp[0] == 'W' or rsp[0] == 'X':
+             rsp_stop_reply(options, cmd, cmd_args, rsp)
+             return
+         if rsp[0] == 'O':
+-            print "stdout: %s" % (rsp)
++            print("stdout: %s" % (rsp))
+             return
+     else:
+-        print "not supported (cmd = '%s', args = '%s', rsp = '%s')" % (cmd, cmd_args, rsp)
++        print("not supported (cmd = '%s', args = '%s', rsp = '%s')" % (cmd, cmd_args, rsp))
+ 
+ 
+ def cmd_vAttach(options, cmd, args):
+     (extra_command, args) = string.split(args, ';')
+     if extra_command:
+-        print "%s%s(%s)" % (cmd, extra_command, args)
++        print("%s%s(%s)" % (cmd, extra_command, args))
+     else:
+-        print "attach(pid = %u)" % int(args, 16)
++        print("attach(pid = %u)" % int(args, 16))
+     return False
+ 
+ 
+ def cmd_qRegisterInfo(options, cmd, args):
+-    print 'query_register_info(reg_num=%i)' % (int(args, 16))
++    print('query_register_info(reg_num=%i)' % (int(args, 16)))
+     return False
+ 
+ 
+ def rsp_qRegisterInfo(options, cmd, cmd_args, rsp):
+     global g_max_register_info_name_len
+-    print 'query_register_info(reg_num=%i):' % (int(cmd_args, 16)),
++    print('query_register_info(reg_num=%i):' % (int(cmd_args, 16)), end=' ')
+     if len(rsp) == 3 and rsp[0] == 'E':
+         g_max_register_info_name_len = 0
+         for reg_info in g_register_infos:
+             name_len = len(reg_info.name())
+             if g_max_register_info_name_len < name_len:
+                 g_max_register_info_name_len = name_len
+-        print' DONE'
++        print(' DONE')
+     else:
+         packet = Packet(rsp)
+         reg_info = RegisterInfo(packet.get_key_value_pairs())
+         g_register_infos.append(reg_info)
+-        print reg_info
++        print(reg_info)
+     return False
+ 
+ 
+@@ -923,7 +923,7 @@
+         query_type = 'first'
+     else:
+         query_type = 'subsequent'
+-    print 'get_current_thread_list(type=%s)' % (query_type)
++    print('get_current_thread_list(type=%s)' % (query_type))
+     return False
+ 
+ 
+@@ -934,20 +934,20 @@
+         tids = packet.split_hex(';', 'big')
+         for i, tid in enumerate(tids):
+             if i:
+-                print ',',
+-            print '0x%x' % (tid),
+-        print
++                print(',', end=' ')
++            print('0x%x' % (tid), end=' ')
++        print()
+     elif response_type == 'l':
+-        print 'END'
++        print('END')
+ 
+ 
+ def rsp_hex_big_endian(options, cmd, cmd_args, rsp):
+     if rsp == '':
+-        print "%s%s is not supported" % (cmd, cmd_args)
++        print("%s%s is not supported" % (cmd, cmd_args))
+     else:
+         packet = Packet(rsp)
+         uval = packet.get_hex_uint('big')
+-        print '%s: 0x%x' % (cmd, uval)
++        print('%s: 0x%x' % (cmd, uval))
+ 
+ 
+ def cmd_read_mem_bin(options, cmd, args):
+@@ -956,7 +956,7 @@
+     addr = packet.get_hex_uint('big')
+     comma = packet.get_char()
+     size = packet.get_hex_uint('big')
+-    print 'binary_read_memory (addr = 0x%16.16x, size = %u)' % (addr, size)
++    print('binary_read_memory (addr = 0x%16.16x, size = %u)' % (addr, size))
+     return False
+ 
+ 
+@@ -965,7 +965,7 @@
+     addr = packet.get_hex_uint('big')
+     comma = packet.get_char()
+     size = packet.get_hex_uint('big')
+-    print 'memory:'
++    print('memory:')
+     if size > 0:
+         dump_hex_memory_buffer(addr, rsp)
+ 
+@@ -975,7 +975,7 @@
+     addr = packet.get_hex_uint('big')
+     comma = packet.get_char()
+     size = packet.get_hex_uint('big')
+-    print 'read_memory (addr = 0x%16.16x, size = %u)' % (addr, size)
++    print('read_memory (addr = 0x%16.16x, size = %u)' % (addr, size))
+     return False
+ 
+ 
+@@ -987,10 +987,10 @@
+     while uval is not None:
+         if ((idx % 16) == 0):
+             if ascii:
+-                print '  ', ascii
++                print('  ', ascii)
+                 ascii = ''
+-            print '0x%x:' % (addr + idx),
+-        print '%2.2x' % (uval),
++            print('0x%x:' % (addr + idx), end=' ')
++        print('%2.2x' % (uval), end=' ')
+         if 0x20 <= uval and uval < 0x7f:
+             ascii += '%c' % uval
+         else:
+@@ -998,7 +998,7 @@
+         uval = packet.get_hex_uint8()
+         idx = idx + 1
+     if ascii:
+-        print '  ', ascii
++        print('  ', ascii)
+         ascii = ''
+ 
+ 
+@@ -1006,13 +1006,13 @@
+     packet = Packet(args)
+     addr = packet.get_hex_uint('big')
+     if packet.get_char() != ',':
+-        print 'error: invalid write memory command (missing comma after address)'
++        print('error: invalid write memory command (missing comma after address)')
+         return
+     size = packet.get_hex_uint('big')
+     if packet.get_char() != ':':
+-        print 'error: invalid write memory command (missing colon after size)'
++        print('error: invalid write memory command (missing colon after size)')
+         return
+-    print 'write_memory (addr = 0x%16.16x, size = %u, data:' % (addr, size)
++    print('write_memory (addr = 0x%16.16x, size = %u, data:' % (addr, size))
+     dump_hex_memory_buffer(addr, packet.str)
+     return False
+ 
+@@ -1021,25 +1021,25 @@
+     packet = Packet(args)
+     byte_size = packet.get_hex_uint('big')
+     if packet.get_char() != ',':
+-        print 'error: invalid allocate memory command (missing comma after address)'
++        print('error: invalid allocate memory command (missing comma after address)')
+         return
+-    print 'allocate_memory (byte-size = %u (0x%x), permissions = %s)' % (byte_size, byte_size, packet.str)
++    print('allocate_memory (byte-size = %u (0x%x), permissions = %s)' % (byte_size, byte_size, packet.str))
+     return False
+ 
+ 
+ def rsp_alloc_memory(options, cmd, cmd_args, rsp):
+     packet = Packet(rsp)
+     addr = packet.get_hex_uint('big')
+-    print 'addr = 0x%x' % addr
++    print('addr = 0x%x' % addr)
+ 
+ 
+ def cmd_dealloc_memory(options, cmd, args):
+     packet = Packet(args)
+     addr = packet.get_hex_uint('big')
+     if packet.get_char() != ',':
+-        print 'error: invalid allocate memory command (missing comma after address)'
++        print('error: invalid allocate memory command (missing comma after address)')
+     else:
+-        print 'deallocate_memory (addr = 0x%x, permissions = %s)' % (addr, packet.str)
++        print('deallocate_memory (addr = 0x%x, permissions = %s)' % (addr, packet.str))
+     return False
+ 
+ 
+@@ -1085,21 +1085,21 @@
+     if tid is not None:
+         s += ', tid = 0x%4.4x' % (tid)
+     s += ')'
+-    print s
++    print(s)
+     return False
+ 
+ 
+ def rsp_read_one_reg(options, cmd, cmd_args, rsp):
+     packet = Packet(cmd_args)
+     reg_num = packet.get_hex_uint('big')
+-    print get_register_name_equal_value(options, reg_num, rsp)
++    print(get_register_name_equal_value(options, reg_num, rsp))
+ 
+ 
+ def cmd_write_one_reg(options, cmd, args):
+     packet = Packet(args)
+     reg_num = packet.get_hex_uint('big')
+     if packet.get_char() != '=':
+-        print 'error: invalid register write packet'
++        print('error: invalid register write packet')
+     else:
+         name = None
+         hex_value_str = packet.get_hex_chars()
+@@ -1112,7 +1112,7 @@
+         if tid is not None:
+             s += ', tid = 0x%4.4x' % (tid)
+         s += ')'
+-        print s
++        print(s)
+     return False
+ 
+ 
+@@ -1122,7 +1122,7 @@
+         hex_value_str = packet.get_hex_chars(nibble_size)
+         if hex_value_str is not None:
+             value = reg_info.get_value_from_hex_string(hex_value_str)
+-            print '%*s = %s' % (g_max_register_info_name_len, reg_info.name(), value)
++            print('%*s = %s' % (g_max_register_info_name_len, reg_info.name(), value))
+         else:
+             return
+ 
+@@ -1132,9 +1132,9 @@
+     packet.get_char()  # toss the 'g' command character
+     tid = get_thread_from_thread_suffix(packet.str)
+     if tid is not None:
+-        print 'read_all_register(thread = 0x%4.4x)' % tid
++        print('read_all_register(thread = 0x%4.4x)' % tid)
+     else:
+-        print 'read_all_register()'
++        print('read_all_register()')
+     return False
+ 
+ 
+@@ -1145,7 +1145,7 @@
+ 
+ def cmd_write_all_regs(options, cmd, args):
+     packet = Packet(args)
+-    print 'write_all_registers()'
++    print('write_all_registers()')
+     dump_all_regs(packet)
+     return False
+ 
+@@ -1165,7 +1165,7 @@
+     bp_size = packet.get_hex_uint('big')
+     s += g_bp_types[bp_type]
+     s += " (addr = 0x%x, size = %u)" % (bp_addr, bp_size)
+-    print s
++    print(s)
+     return False
+ 
+ 
+@@ -1173,22 +1173,22 @@
+     packet = Packet(args)
+     packet.get_char()  # skip ':' character
+     addr = packet.get_hex_uint('big')
+-    print 'get_memory_region_info (addr=0x%x)' % (addr)
++    print('get_memory_region_info (addr=0x%x)' % (addr))
+     return False
+ 
+ 
+ def cmd_kill(options, cmd, args):
+-    print 'kill_process()'
++    print('kill_process()')
+     return False
+ 
+ 
+ def cmd_jThreadsInfo(options, cmd, args):
+-    print 'jThreadsInfo()'
++    print('jThreadsInfo()')
+     return False
+ 
+ 
+ def cmd_jGetLoadedDynamicLibrariesInfos(options, cmd, args):
+-    print 'jGetLoadedDynamicLibrariesInfos()'
++    print('jGetLoadedDynamicLibrariesInfos()')
+     return False
+ 
+ 
+@@ -1210,9 +1210,9 @@
+ 
+ 
+ def rsp_json(options, cmd, cmd_args, rsp):
+-    print '%s() reply:' % (cmd)
++    print('%s() reply:' % (cmd))
+     json_tree = json.loads(rsp)
+-    print json.dumps(json_tree, indent=4, separators=(',', ': '))
++    print(json.dumps(json_tree, indent=4, separators=(',', ': ')))
+ 
+ 
+ def rsp_jGetLoadedDynamicLibrariesInfos(options, cmd, cmd_args, rsp):
+@@ -1356,7 +1356,7 @@
+     packet_contents_name_regex = re.compile('\$([^#]*)#[0-9a-fA-F]{2}')
+     packet_checksum_regex = re.compile('.*#[0-9a-fA-F]{2}$')
+     packet_names_regex_str = '(' + \
+-        '|'.join(gdb_remote_commands.keys()) + ')(.*)'
++        '|'.join(list(gdb_remote_commands.keys())) + ')(.*)'
+     packet_names_regex = re.compile(packet_names_regex_str)
+ 
+     base_time = 0.0
+@@ -1387,26 +1387,26 @@
+             packet = m.group('packet')
+             sys.stdout.write(options.colors.green())
+             if not options.quiet and not hide_next_response:
+-                print '#  ', line
++                print('#  ', line)
+             sys.stdout.write(options.colors.reset())
+ 
+             # print 'direction = "%s", packet = "%s"' % (direction, packet)
+ 
+             if packet[0] == '+':
+                 if is_command:
+-                    print '-->',
++                    print('-->', end=' ')
+                 else:
+-                    print '<--',
++                    print('<--', end=' ')
+                 if not options.quiet:
+-                    print 'ACK'
++                    print('ACK')
+                 continue
+             elif packet[0] == '-':
+                 if is_command:
+-                    print '-->',
++                    print('-->', end=' ')
+                 else:
+-                    print '<--',
++                    print('<--', end=' ')
+                 if not options.quiet:
+-                    print 'NACK'
++                    print('NACK')
+                 continue
+             elif packet[0] == '$':
+                 m = packet_contents_name_regex.match(packet)
+@@ -1415,7 +1415,7 @@
+                     idx = line_index + 1
+                     while idx < num_lines:
+                         if not options.quiet and not hide_next_response:
+-                            print '#  ', lines[idx]
++                            print('#  ', lines[idx])
+                         multiline_packet += lines[idx]
+                         m = packet_contents_name_regex.match(multiline_packet)
+                         if m:
+@@ -1426,9 +1426,9 @@
+                             idx += 1
+                 if m:
+                     if is_command:
+-                        print '-->',
++                        print('-->', end=' ')
+                     else:
+-                        print '<--',
++                        print('<--', end=' ')
+                     contents = decode_packet(m.group(1))
+                     if is_command:
+                         hide_next_response = False
+@@ -1458,11 +1458,11 @@
+                         gdb_remote_commands[last_command]['rsp'](
+                             options, last_command, last_command_args, contents)
+                 else:
+-                    print 'error: invalid packet: "', packet, '"'
++                    print('error: invalid packet: "', packet, '"')
+             else:
+-                print '???'
++                print('???')
+         else:
+-            print '## ', line
++            print('## ', line)
+         match = timestamp_regex.match(line)
+         if match:
+             curr_time = float(match.group(2))
+@@ -1491,35 +1491,35 @@
+                     min_time = delta
+ 
+             if not options or not options.quiet:
+-                print '%s%.6f %+.6f%s' % (match.group(1),
++                print('%s%.6f %+.6f%s' % (match.group(1),
+                                           curr_time - base_time,
+                                           delta,
+-                                          match.group(3))
++                                          match.group(3)))
+             last_time = curr_time
+         # else:
+         #     print line
+     (average, std_dev) = calculate_mean_and_standard_deviation(all_packet_times)
+     if average and std_dev:
+-        print '%u packets with average packet time of %f and standard deviation of %f' % (len(all_packet_times), average, std_dev)
++        print('%u packets with average packet time of %f and standard deviation of %f' % (len(all_packet_times), average, std_dev))
+     if packet_total_times:
+         total_packet_time = 0.0
+         total_packet_count = 0
+-        for key, vvv in packet_total_times.items():
++        for key, vvv in list(packet_total_times.items()):
+             # print '  key = (%s) "%s"' % (type(key), key)
+             # print 'value = (%s) %s' % (type(vvv), vvv)
+             # if type(vvv) == 'float':
+             total_packet_time += vvv
+-        for key, vvv in packet_counts.items():
++        for key, vvv in list(packet_counts.items()):
+             total_packet_count += vvv
+ 
+-        print '#------------------------------------------------------------'
+-        print '# Packet timing summary:'
+-        print '# Totals: time = %6f, count = %6d' % (total_packet_time,
+-                                                     total_packet_count)
+-        print '# Min packet time: time = %6f' % (min_time)
+-        print '#------------------------------------------------------------'
+-        print '# Packet                   Time (sec)  Percent Count  Latency'
+-        print '#------------------------- ----------- ------- ------ -------'
++        print('#------------------------------------------------------------')
++        print('# Packet timing summary:')
++        print('# Totals: time = %6f, count = %6d' % (total_packet_time,
++                                                     total_packet_count))
++        print('# Min packet time: time = %6f' % (min_time))
++        print('#------------------------------------------------------------')
++        print('# Packet                   Time (sec)  Percent Count  Latency')
++        print('#------------------------- ----------- ------- ------ -------')
+         if options and options.sort_count:
+             res = sorted(
+                 packet_counts,
+@@ -1537,9 +1537,9 @@
+                 packet_percent = (
+                     packet_total_time / total_packet_time) * 100.0
+                 packet_count = packet_counts[item]
+-                print "  %24s %11.6f  %5.2f%% %6d %9.6f" % (
++                print("  %24s %11.6f  %5.2f%% %6d %9.6f" % (
+                         item, packet_total_time, packet_percent, packet_count,
+-                        float(packet_total_time) / float(packet_count))
++                        float(packet_total_time) / float(packet_count)))
+         if options.plot:
+             plot_latencies(packet_times)
+ 
+@@ -1593,7 +1593,7 @@
+     try:
+         (options, args) = parser.parse_args(sys.argv[1:])
+     except:
+-        print 'error: argument error'
++        print('error: argument error')
+         sys.exit(1)
+ 
+     options.colors = TerminalColors(options.color)
+@@ -1603,18 +1603,18 @@
+         lldb.debugger = lldb.SBDebugger.Create()
+         import lldb.macosx.crashlog
+         options.symbolicator = lldb.macosx.crashlog.CrashLog(options.crashlog)
+-        print '%s' % (options.symbolicator)
++        print('%s' % (options.symbolicator))
+ 
+     # This script is being run from the command line, create a debugger in case we are
+     # going to use any debugger functions in our function.
+     if len(args):
+         for file in args:
+-            print '#----------------------------------------------------------------------'
+-            print "# GDB remote log file: '%s'" % file
+-            print '#----------------------------------------------------------------------'
++            print('#----------------------------------------------------------------------')
++            print("# GDB remote log file: '%s'" % file)
++            print('#----------------------------------------------------------------------')
+             parse_gdb_log_file(file, options)
+         if options.symbolicator:
+-            print '%s' % (options.symbolicator)
++            print('%s' % (options.symbolicator))
+     else:
+         parse_gdb_log(sys.stdin, options)
+ 
+@@ -1627,4 +1627,4 @@
+             'command script add -f gdbremote.start_gdb_log start_gdb_log')
+         lldb.debugger.HandleCommand(
+             'command script add -f gdbremote.stop_gdb_log stop_gdb_log')
+-        print 'The "start_gdb_log" and "stop_gdb_log" commands are now installed and ready for use, type "start_gdb_log --help" or "stop_gdb_log --help" for more information'
++        print('The "start_gdb_log" and "stop_gdb_log" commands are now installed and ready for use, type "start_gdb_log --help" or "stop_gdb_log --help" for more information')
+diff -ru lldb-8.0.0.src.orig/examples/python/globals.py lldb-8.0.0.src/examples/python/globals.py
+--- lldb-8.0.0.src.orig/examples/python/globals.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/globals.py	2019-03-26 18:04:37.948724065 +0000
+@@ -9,7 +9,7 @@
+ #----------------------------------------------------------------------
+ 
+ import lldb
+-import commands
++import subprocess
+ import optparse
+ import os
+ import shlex
+@@ -46,22 +46,22 @@
+                             # Print results for anything that matched
+                             for global_variable in global_variable_list:
+                                 # returns the global variable name as a string
+-                                print 'name = %s' % global_variable.name
++                                print('name = %s' % global_variable.name)
+                                 # Returns the variable value as a string
+-                                print 'value = %s' % global_variable.value
+-                                print 'type = %s' % global_variable.type    # Returns an lldb.SBType object
++                                print('value = %s' % global_variable.value)
++                                print('type = %s' % global_variable.type)    # Returns an lldb.SBType object
+                                 # Returns an lldb.SBAddress (section offset
+                                 # address) for this global
+-                                print 'addr = %s' % global_variable.addr
++                                print('addr = %s' % global_variable.addr)
+                                 # Returns the file virtual address for this
+                                 # global
+-                                print 'file_addr = 0x%x' % global_variable.addr.file_addr
++                                print('file_addr = 0x%x' % global_variable.addr.file_addr)
+                                 # returns the global variable value as a string
+-                                print 'location = %s' % global_variable.location
++                                print('location = %s' % global_variable.location)
+                                 # Returns the size in bytes of this global
+                                 # variable
+-                                print 'size = %s' % global_variable.size
+-                                print
++                                print('size = %s' % global_variable.size)
++                                print()
+ 
+ 
+ def globals(command_args):
+diff -ru lldb-8.0.0.src.orig/examples/python/jump.py lldb-8.0.0.src/examples/python/jump.py
+--- lldb-8.0.0.src.orig/examples/python/jump.py	2019-03-26 17:36:55.200323102 +0000
++++ lldb-8.0.0.src/examples/python/jump.py	2019-03-26 18:04:33.531661065 +0000
+@@ -78,7 +78,7 @@
+         if (mo is not None):
+             matched = True
+             # print "Matched <address-expression>"
+-            address = long(mo.group(1), base=0)
++            address = int(mo.group(1), base=0)
+             breakpoint = target.BreakpointCreateByAddress(address)
+ 
+     if (not matched):
+@@ -193,4 +193,4 @@
+     # Module is being run inside the LLDB interpreter
+     jump.__doc__ = usage_string()
+     lldb.debugger.HandleCommand('command script add -f jump.jump jump')
+-    print 'The "jump" command has been installed, type "help jump" or "jump <ENTER>" for detailed help.'
++    print('The "jump" command has been installed, type "help jump" or "jump <ENTER>" for detailed help.')
+diff -ru lldb-8.0.0.src.orig/examples/python/lldb_module_utils.py lldb-8.0.0.src/examples/python/lldb_module_utils.py
+--- lldb-8.0.0.src.orig/examples/python/lldb_module_utils.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/lldb_module_utils.py	2019-03-26 18:04:27.583576229 +0000
+@@ -61,14 +61,14 @@
+                 result.SetError('no module found that matches "%s".' % (module_path))
+                 return
+             num_cus = module.GetNumCompileUnits()
+-            print >>result, 'Module: "%s"' % (module.file.fullpath),
++            print('Module: "%s"' % (module.file.fullpath), end=' ', file=result)
+             if num_cus == 0:
+-                print >>result, 'no debug info.'
++                print('no debug info.', file=result)
+                 continue
+-            print >>result, 'has %u compile units:' % (num_cus)
++            print('has %u compile units:' % (num_cus), file=result)
+             for cu_idx in range(num_cus):
+                 cu = module.GetCompileUnitAtIndex(cu_idx)
+-                print >>result, '  Compile Unit: %s' % (cu.file.fullpath)
++                print('  Compile Unit: %s' % (cu.file.fullpath), file=result)
+                 for line_idx in range(cu.GetNumLineEntries()):
+                     line_entry = cu.GetLineEntryAtIndex(line_idx)
+                     start_file_addr = line_entry.addr.file_addr
+@@ -163,19 +163,19 @@
+                 result.SetError('no module found that matches "%s".' % (module_path))
+                 return
+             num_cus = module.GetNumCompileUnits()
+-            print >>result, 'Module: "%s"' % (module.file.fullpath),
++            print('Module: "%s"' % (module.file.fullpath), end=' ', file=result)
+             if num_cus == 0:
+-                print >>result, 'no debug info.'
++                print('no debug info.', file=result)
+                 continue
+-            print >>result, 'has %u compile units:' % (num_cus)
++            print('has %u compile units:' % (num_cus), file=result)
+             for i in range(num_cus):
+                 cu = module.GetCompileUnitAtIndex(i)
+-                print >>result, '  Compile Unit: %s' % (cu.file.fullpath)
++                print('  Compile Unit: %s' % (cu.file.fullpath), file=result)
+                 if options.support_files:
+                     num_support_files = cu.GetNumSupportFiles()
+                     for j in range(num_support_files):
+                         path = cu.GetSupportFileAtIndex(j).fullpath
+-                        print >>result, '    file[%u]: %s' % (j, path)
++                        print('    file[%u]: %s' % (j, path), file=result)
+ 
+ 
+ def __lldb_init_module(debugger, dict):
+@@ -187,5 +187,5 @@
+                                                         DumpLineTables.command_name))
+     debugger.HandleCommand(
+         'command script add -c %s.DumpFiles %s' % (__name__, DumpFiles.command_name))
+-    print 'The "%s" and "%s" commands have been installed.' % (DumpLineTables.command_name,
+-                                                               DumpFiles.command_name)
++    print('The "%s" and "%s" commands have been installed.' % (DumpLineTables.command_name,
++                                                               DumpFiles.command_name))
+diff -ru lldb-8.0.0.src.orig/examples/python/lldbtk.py lldb-8.0.0.src/examples/python/lldbtk.py
+--- lldb-8.0.0.src.orig/examples/python/lldbtk.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/lldbtk.py	2019-03-26 18:04:34.933681062 +0000
+@@ -3,8 +3,8 @@
+ import lldb
+ import shlex
+ import sys
+-from Tkinter import *
+-import ttk
++from tkinter import *
++import tkinter.ttk
+ 
+ 
+ class ValueTreeItemDelegate(object):
+@@ -441,10 +441,10 @@
+         return item_dicts
+ 
+ 
+-class DelegateTree(ttk.Frame):
++class DelegateTree(tkinter.ttk.Frame):
+ 
+     def __init__(self, column_dicts, delegate, title, name):
+-        ttk.Frame.__init__(self, name=name)
++        tkinter.ttk.Frame.__init__(self, name=name)
+         self.pack(expand=Y, fill=BOTH)
+         self.master.title(title)
+         self.delegate = delegate
+@@ -456,17 +456,17 @@
+         self._populate_root()
+ 
+     def _create_treeview(self, parent):
+-        frame = ttk.Frame(parent)
++        frame = tkinter.ttk.Frame(parent)
+         frame.pack(side=TOP, fill=BOTH, expand=Y)
+ 
+         column_ids = list()
+         for i in range(1, len(self.columns_dicts)):
+             column_ids.append(self.columns_dicts[i]['id'])
+         # create the tree and scrollbars
+-        self.tree = ttk.Treeview(columns=column_ids)
++        self.tree = tkinter.ttk.Treeview(columns=column_ids)
+ 
+-        scroll_bar_v = ttk.Scrollbar(orient=VERTICAL, command=self.tree.yview)
+-        scroll_bar_h = ttk.Scrollbar(
++        scroll_bar_v = tkinter.ttk.Scrollbar(orient=VERTICAL, command=self.tree.yview)
++        scroll_bar_h = tkinter.ttk.Scrollbar(
+             orient=HORIZONTAL, command=self.tree.xview)
+         self.tree['yscroll'] = scroll_bar_v.set
+         self.tree['xscroll'] = scroll_bar_h.set
+@@ -539,19 +539,19 @@
+     sys.argv = ['tk-variables']
+     target = debugger.GetSelectedTarget()
+     if not target:
+-        print >>result, "invalid target"
++        print("invalid target", file=result)
+         return
+     process = target.GetProcess()
+     if not process:
+-        print >>result, "invalid process"
++        print("invalid process", file=result)
+         return
+     thread = process.GetSelectedThread()
+     if not thread:
+-        print >>result, "invalid thread"
++        print("invalid thread", file=result)
+         return
+     frame = thread.GetSelectedFrame()
+     if not frame:
+-        print >>result, "invalid frame"
++        print("invalid frame", file=result)
+         return
+     # Parse command line args
+     command_args = shlex.split(command)
+@@ -573,11 +573,11 @@
+     sys.argv = ['tk-process']
+     target = debugger.GetSelectedTarget()
+     if not target:
+-        print >>result, "invalid target"
++        print("invalid target", file=result)
+         return
+     process = target.GetProcess()
+     if not process:
+-        print >>result, "invalid process"
++        print("invalid process", file=result)
+         return
+     # Parse command line args
+     columnd_dicts = [{'id': '#0', 'text': 'Name', 'anchor': W, 'stretch': 0},
+@@ -598,7 +598,7 @@
+     sys.argv = ['tk-target']
+     target = debugger.GetSelectedTarget()
+     if not target:
+-        print >>result, "invalid target"
++        print("invalid target", file=result)
+         return
+     # Parse command line args
+     columnd_dicts = [{'id': '#0', 'text': 'Name', 'anchor': W, 'stretch': 0},
+diff -ru lldb-8.0.0.src.orig/examples/python/mach_o.py lldb-8.0.0.src/examples/python/mach_o.py
+--- lldb-8.0.0.src.orig/examples/python/mach_o.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/mach_o.py	2019-03-26 18:04:32.789650482 +0000
+@@ -7,7 +7,7 @@
+ import re
+ import struct
+ import string
+-import StringIO
++import io
+ import sys
+ import uuid
+ 
+@@ -187,11 +187,11 @@
+     while i < hex_bytes_len:
+         if ((i / 2) % num_per_line) == 0:
+             if i > 0:
+-                print ' %s' % (ascii_str)
++                print(' %s' % (ascii_str))
+                 ascii_str = ''
+-            print '0x%8.8x:' % (addr + i),
++            print('0x%8.8x:' % (addr + i), end=' ')
+         hex_byte = hex_bytes[i:i + 2]
+-        print hex_byte,
++        print(hex_byte, end=' ')
+         int_byte = int(hex_byte, 16)
+         ascii_char = '%c' % (int_byte)
+         if int_byte >= 32 and int_byte < 127:
+@@ -204,8 +204,8 @@
+             padding = num_per_line - ((i / 2) % num_per_line)
+         else:
+             padding = 0
+-        print '%*s%s' % (padding * 3 + 1, '', ascii_str)
+-    print
++        print('%*s%s' % (padding * 3 + 1, '', ascii_str))
++    print()
+ 
+ 
+ class TerminalColors:
+@@ -371,11 +371,11 @@
+     for ch in s:
+         if (i % bytes_per_line) == 0:
+             if line:
+-                print line
++                print(line)
+             line = '%#8.8x: ' % (addr + i)
+         line += "%02X " % ord(ch)
+         i += 1
+-    print line
++    print(line)
+ 
+ 
+ def dump_hex_byte_string_diff(addr, a, b, bytes_per_line=16):
+@@ -404,7 +404,7 @@
+         mismatch = ch_a != ch_b
+         if (i % bytes_per_line) == 0:
+             if line:
+-                print line
++                print(line)
+             line = '%#8.8x: ' % (addr + i)
+         if mismatch:
+             line += tty_colors.red()
+@@ -413,7 +413,7 @@
+             line += tty_colors.default()
+         i += 1
+ 
+-    print line
++    print(line)
+ 
+ 
+ class Mach:
+@@ -533,11 +533,11 @@
+             # f.close()
+         except IOError as xxx_todo_changeme:
+             (errno, strerror) = xxx_todo_changeme.args
+-            print "I/O error({0}): {1}".format(errno, strerror)
++            print("I/O error({0}): {1}".format(errno, strerror))
+         except ValueError:
+-            print "Could not convert data to an integer."
++            print("Could not convert data to an integer.")
+         except:
+-            print "Unexpected error:", sys.exc_info()[0]
++            print("Unexpected error:", sys.exc_info()[0])
+             raise
+ 
+     def compare(self, rhs):
+@@ -625,56 +625,56 @@
+                 self.archs[i].mach.unpack(data, skinny_magic)
+ 
+         def compare(self, rhs):
+-            print 'error: comparing two universal files is not supported yet'
++            print('error: comparing two universal files is not supported yet')
+             return False
+ 
+         def dump(self, options):
+             if options.dump_header:
+-                print
+-                print "Universal Mach File: magic = %s, nfat_arch = %u" % (self.magic, self.nfat_arch)
+-                print
++                print()
++                print("Universal Mach File: magic = %s, nfat_arch = %u" % (self.magic, self.nfat_arch))
++                print()
+             if self.nfat_arch > 0:
+                 if options.dump_header:
+                     self.archs[0].dump_header(True, options)
+                     for i in range(self.nfat_arch):
+                         self.archs[i].dump_flat(options)
+                 if options.dump_header:
+-                    print
++                    print()
+                 for i in range(self.nfat_arch):
+                     self.archs[i].mach.dump(options)
+ 
+         def dump_header(self, dump_description=True, options=None):
+             if dump_description:
+-                print self.description()
++                print(self.description())
+             for i in range(self.nfat_arch):
+                 self.archs[i].mach.dump_header(True, options)
+-                print
++                print()
+ 
+         def dump_load_commands(self, dump_description=True, options=None):
+             if dump_description:
+-                print self.description()
++                print(self.description())
+             for i in range(self.nfat_arch):
+                 self.archs[i].mach.dump_load_commands(True, options)
+-                print
++                print()
+ 
+         def dump_sections(self, dump_description=True, options=None):
+             if dump_description:
+-                print self.description()
++                print(self.description())
+             for i in range(self.nfat_arch):
+                 self.archs[i].mach.dump_sections(True, options)
+-                print
++                print()
+ 
+         def dump_section_contents(self, options):
+             for i in range(self.nfat_arch):
+                 self.archs[i].mach.dump_section_contents(options)
+-                print
++                print()
+ 
+         def dump_symtab(self, dump_description=True, options=None):
+             if dump_description:
+-                print self.description()
++                print(self.description())
+             for i in range(self.nfat_arch):
+                 self.archs[i].mach.dump_symtab(True, options)
+-                print
++                print()
+ 
+         def dump_symbol_names_matching_regex(self, regex, file=None):
+             for i in range(self.nfat_arch):
+@@ -698,24 +698,24 @@
+ 
+             def dump_header(self, dump_description=True, options=None):
+                 if options.verbose:
+-                    print "CPU        SUBTYPE    OFFSET     SIZE       ALIGN"
+-                    print "---------- ---------- ---------- ---------- ----------"
++                    print("CPU        SUBTYPE    OFFSET     SIZE       ALIGN")
++                    print("---------- ---------- ---------- ---------- ----------")
+                 else:
+-                    print "ARCH       FILEOFFSET FILESIZE   ALIGN"
+-                    print "---------- ---------- ---------- ----------"
++                    print("ARCH       FILEOFFSET FILESIZE   ALIGN")
++                    print("---------- ---------- ---------- ----------")
+ 
+             def dump_flat(self, options):
+                 if options.verbose:
+-                    print "%#8.8x %#8.8x %#8.8x %#8.8x %#8.8x" % (self.arch.cpu, self.arch.sub, self.offset, self.size, self.align)
++                    print("%#8.8x %#8.8x %#8.8x %#8.8x %#8.8x" % (self.arch.cpu, self.arch.sub, self.offset, self.size, self.align))
+                 else:
+-                    print "%-10s %#8.8x %#8.8x %#8.8x" % (self.arch, self.offset, self.size, self.align)
++                    print("%-10s %#8.8x %#8.8x %#8.8x" % (self.arch, self.offset, self.size, self.align))
+ 
+             def dump(self):
+-                print "   cputype: %#8.8x" % self.arch.cpu
+-                print "cpusubtype: %#8.8x" % self.arch.sub
+-                print "    offset: %#8.8x" % self.offset
+-                print "      size: %#8.8x" % self.size
+-                print "     align: %#8.8x" % self.align
++                print("   cputype: %#8.8x" % self.arch.cpu)
++                print("cpusubtype: %#8.8x" % self.arch.sub)
++                print("    offset: %#8.8x" % self.offset)
++                print("      size: %#8.8x" % self.size)
++                print("     align: %#8.8x" % self.align)
+ 
+             def __str__(self):
+                 return "Mach.Universal.ArchInfo: %#8.8x %#8.8x %#8.8x %#8.8x %#8.8x" % (
+@@ -906,21 +906,21 @@
+             return lc
+ 
+         def compare(self, rhs):
+-            print "\nComparing:"
+-            print "a) %s %s" % (self.arch, self.path)
+-            print "b) %s %s" % (rhs.arch, rhs.path)
++            print("\nComparing:")
++            print("a) %s %s" % (self.arch, self.path))
++            print("b) %s %s" % (rhs.arch, rhs.path))
+             result = True
+             if self.type == rhs.type:
+                 for lhs_section in self.sections[1:]:
+                     rhs_section = rhs.get_section_by_section(lhs_section)
+                     if rhs_section:
+-                        print 'comparing %s.%s...' % (lhs_section.segname, lhs_section.sectname),
++                        print('comparing %s.%s...' % (lhs_section.segname, lhs_section.sectname), end=' ')
+                         sys.stdout.flush()
+                         lhs_data = lhs_section.get_contents(self)
+                         rhs_data = rhs_section.get_contents(rhs)
+                         if lhs_data and rhs_data:
+                             if lhs_data == rhs_data:
+-                                print 'ok'
++                                print('ok')
+                             else:
+                                 lhs_data_len = len(lhs_data)
+                                 rhs_data_len = len(rhs_data)
+@@ -938,51 +938,51 @@
+                                 #         result = False
+                                 # else:
+                                 result = False
+-                                print 'error: sections differ'
++                                print('error: sections differ')
+                                 # print 'a) %s' % (lhs_section)
+                                 # dump_hex_byte_string_diff(0, lhs_data, rhs_data)
+                                 # print 'b) %s' % (rhs_section)
+                                 # dump_hex_byte_string_diff(0, rhs_data, lhs_data)
+                         elif lhs_data and not rhs_data:
+-                            print 'error: section data missing from b:'
+-                            print 'a) %s' % (lhs_section)
+-                            print 'b) %s' % (rhs_section)
++                            print('error: section data missing from b:')
++                            print('a) %s' % (lhs_section))
++                            print('b) %s' % (rhs_section))
+                             result = False
+                         elif not lhs_data and rhs_data:
+-                            print 'error: section data missing from a:'
+-                            print 'a) %s' % (lhs_section)
+-                            print 'b) %s' % (rhs_section)
++                            print('error: section data missing from a:')
++                            print('a) %s' % (lhs_section))
++                            print('b) %s' % (rhs_section))
+                             result = False
+                         elif lhs_section.offset or rhs_section.offset:
+-                            print 'error: section data missing for both a and b:'
+-                            print 'a) %s' % (lhs_section)
+-                            print 'b) %s' % (rhs_section)
++                            print('error: section data missing for both a and b:')
++                            print('a) %s' % (lhs_section))
++                            print('b) %s' % (rhs_section))
+                             result = False
+                         else:
+-                            print 'ok'
++                            print('ok')
+                     else:
+                         result = False
+-                        print 'error: section %s is missing in %s' % (lhs_section.sectname, rhs.path)
++                        print('error: section %s is missing in %s' % (lhs_section.sectname, rhs.path))
+             else:
+-                print 'error: comaparing a %s mach-o file with a %s mach-o file is not supported' % (self.type, rhs.type)
++                print('error: comaparing a %s mach-o file with a %s mach-o file is not supported' % (self.type, rhs.type))
+                 result = False
+             if not result:
+-                print 'error: mach files differ'
++                print('error: mach files differ')
+             return result
+ 
+         def dump_header(self, dump_description=True, options=None):
+             if options.verbose:
+-                print "MAGIC      CPU        SUBTYPE    FILETYPE   NUM CMDS SIZE CMDS  FLAGS"
+-                print "---------- ---------- ---------- ---------- -------- ---------- ----------"
++                print("MAGIC      CPU        SUBTYPE    FILETYPE   NUM CMDS SIZE CMDS  FLAGS")
++                print("---------- ---------- ---------- ---------- -------- ---------- ----------")
+             else:
+-                print "MAGIC        ARCH       FILETYPE       NUM CMDS SIZE CMDS  FLAGS"
+-                print "------------ ---------- -------------- -------- ---------- ----------"
++                print("MAGIC        ARCH       FILETYPE       NUM CMDS SIZE CMDS  FLAGS")
++                print("------------ ---------- -------------- -------- ---------- ----------")
+ 
+         def dump_flat(self, options):
+             if options.verbose:
+-                print "%#8.8x %#8.8x %#8.8x %#8.8x %#8u %#8.8x %#8.8x" % (self.magic, self.arch.cpu, self.arch.sub, self.filetype.value, self.ncmds, self.sizeofcmds, self.flags.bits)
++                print("%#8.8x %#8.8x %#8.8x %#8.8x %#8u %#8.8x %#8.8x" % (self.magic, self.arch.cpu, self.arch.sub, self.filetype.value, self.ncmds, self.sizeofcmds, self.flags.bits))
+             else:
+-                print "%-12s %-10s %-14s %#8u %#8.8x %s" % (self.magic, self.arch, self.filetype, self.ncmds, self.sizeofcmds, self.flags)
++                print("%-12s %-10s %-14s %#8u %#8.8x %s" % (self.magic, self.arch, self.filetype, self.ncmds, self.sizeofcmds, self.flags))
+ 
+         def dump(self, options):
+             if options.dump_header:
+@@ -998,27 +998,27 @@
+                 if len(self.symbols):
+                     self.dump_sections(False, options)
+                 else:
+-                    print "No symbols"
++                    print("No symbols")
+             if options.find_mangled:
+                 self.dump_symbol_names_matching_regex(re.compile('^_?_Z'))
+ 
+         def dump_header(self, dump_description=True, options=None):
+             if dump_description:
+-                print self.description()
+-            print "Mach Header"
+-            print "       magic: %#8.8x %s" % (self.magic.value, self.magic)
+-            print "     cputype: %#8.8x %s" % (self.arch.cpu, self.arch)
+-            print "  cpusubtype: %#8.8x" % self.arch.sub
+-            print "    filetype: %#8.8x %s" % (self.filetype.get_enum_value(), self.filetype.get_enum_name())
+-            print "       ncmds: %#8.8x %u" % (self.ncmds, self.ncmds)
+-            print "  sizeofcmds: %#8.8x" % self.sizeofcmds
+-            print "       flags: %#8.8x %s" % (self.flags.bits, self.flags)
++                print(self.description())
++            print("Mach Header")
++            print("       magic: %#8.8x %s" % (self.magic.value, self.magic))
++            print("     cputype: %#8.8x %s" % (self.arch.cpu, self.arch))
++            print("  cpusubtype: %#8.8x" % self.arch.sub)
++            print("    filetype: %#8.8x %s" % (self.filetype.get_enum_value(), self.filetype.get_enum_name()))
++            print("       ncmds: %#8.8x %u" % (self.ncmds, self.ncmds))
++            print("  sizeofcmds: %#8.8x" % self.sizeofcmds)
++            print("       flags: %#8.8x %s" % (self.flags.bits, self.flags))
+ 
+         def dump_load_commands(self, dump_description=True, options=None):
+             if dump_description:
+-                print self.description()
++                print(self.description())
+             for lc in self.commands:
+-                print lc
++                print(lc)
+ 
+         def get_section_by_name(self, name):
+             for section in self.sections:
+@@ -1034,12 +1034,12 @@
+ 
+         def dump_sections(self, dump_description=True, options=None):
+             if dump_description:
+-                print self.description()
++                print(self.description())
+             num_sections = len(self.sections)
+             if num_sections > 1:
+                 self.sections[1].dump_header()
+                 for sect_idx in range(1, num_sections):
+-                    print "%s" % self.sections[sect_idx]
++                    print("%s" % self.sections[sect_idx])
+ 
+         def dump_section_contents(self, options):
+             saved_section_to_disk = False
+@@ -1053,7 +1053,7 @@
+                             if options.extract_modules:
+                                 # print "Extracting modules from mach file..."
+                                 data = file_extract.FileExtract(
+-                                    StringIO.StringIO(sect_bytes), self.data.byte_order)
++                                    io.StringIO(sect_bytes), self.data.byte_order)
+                                 version = data.get_uint32()
+                                 num_modules = data.get_uint32()
+                                 # print "version = %u, num_modules = %u" %
+@@ -1075,19 +1075,19 @@
+                                     data.seek(data_offset)
+                                     outfile.write(data.read_size(data_size))
+                             else:
+-                                print "Saving section %s to '%s'" % (sectname, options.outfile)
++                                print("Saving section %s to '%s'" % (sectname, options.outfile))
+                                 outfile.write(sect_bytes)
+                             outfile.close()
+                             saved_section_to_disk = True
+                         else:
+-                            print "error: you can only save a single section to disk at a time, skipping section '%s'" % (sectname)
++                            print("error: you can only save a single section to disk at a time, skipping section '%s'" % (sectname))
+                     else:
+-                        print 'section %s:\n' % (sectname)
++                        print('section %s:\n' % (sectname))
+                         section.dump_header()
+-                        print '%s\n' % (section)
++                        print('%s\n' % (section))
+                         dump_memory(0, sect_bytes, options.max_count, 16)
+                 else:
+-                    print 'error: no section named "%s" was found' % (sectname)
++                    print('error: no section named "%s" was found' % (sectname))
+ 
+         def get_segment(self, segname):
+             if len(self.segments) == 1 and self.segments[0].segname == '':
+@@ -1125,20 +1125,20 @@
+                         nlist.unpack(self, self.data, lc_symtab)
+                         self.symbols.append(nlist)
+                 else:
+-                    print "no LC_SYMTAB"
++                    print("no LC_SYMTAB")
+ 
+         def dump_symtab(self, dump_description=True, options=None):
+             self.get_symtab()
+             if dump_description:
+-                print self.description()
++                print(self.description())
+             for i, symbol in enumerate(self.symbols):
+-                print '[%5u] %s' % (i, symbol)
++                print('[%5u] %s' % (i, symbol))
+ 
+         def dump_symbol_names_matching_regex(self, regex, file=None):
+             self.get_symtab()
+             for symbol in self.symbols:
+                 if symbol.name and regex.search(symbol.name):
+-                    print symbol.name
++                    print(symbol.name)
+                     if file:
+                         file.write('%s\n' % (symbol.name))
+ 
+@@ -1247,11 +1247,11 @@
+ 
+         def dump_header(self):
+             if self.is_64:
+-                print "INDEX ADDRESS            SIZE               OFFSET     ALIGN      RELOFF     NRELOC     FLAGS      RESERVED1  RESERVED2  RESERVED3  NAME"
+-                print "===== ------------------ ------------------ ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------------------"
++                print("INDEX ADDRESS            SIZE               OFFSET     ALIGN      RELOFF     NRELOC     FLAGS      RESERVED1  RESERVED2  RESERVED3  NAME")
++                print("===== ------------------ ------------------ ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------------------")
+             else:
+-                print "INDEX ADDRESS    SIZE       OFFSET     ALIGN      RELOFF     NRELOC     FLAGS      RESERVED1  RESERVED2  NAME"
+-                print "===== ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------------------"
++                print("INDEX ADDRESS    SIZE       OFFSET     ALIGN      RELOFF     NRELOC     FLAGS      RESERVED1  RESERVED2  NAME")
++                print("===== ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------------------")
+ 
+         def __str__(self):
+             if self.is_64:
+@@ -1682,7 +1682,7 @@
+ 
+         def default(self, line):
+             '''Catch all for unknown command, which will exit the interpreter.'''
+-            print "uknown command: %s" % line
++            print("uknown command: %s" % line)
+             return True
+ 
+         def do_q(self, line):
+@@ -1813,10 +1813,10 @@
+     (options, mach_files) = parser.parse_args()
+     if options.extract_modules:
+         if options.section_names:
+-            print "error: can't use --section option with the --extract-modules option"
++            print("error: can't use --section option with the --extract-modules option")
+             exit(1)
+         if not options.outfile:
+-            print "error: the --output=FILE option must be specified with the --extract-modules option"
++            print("error: the --output=FILE option must be specified with the --extract-modules option")
+             exit(1)
+         options.section_names.append("__apple_ast")
+     if options.compare:
+@@ -1827,14 +1827,14 @@
+             mach_b.parse(mach_files[1])
+             mach_a.compare(mach_b)
+         else:
+-            print 'error: --compare takes two mach files as arguments'
++            print('error: --compare takes two mach files as arguments')
+     else:
+         if not (options.dump_header or options.dump_load_commands or options.dump_symtab or options.dump_sections or options.find_mangled or options.section_names):
+             options.dump_header = True
+             options.dump_load_commands = True
+         if options.verbose:
+-            print 'options', options
+-            print 'mach_files', mach_files
++            print('options', options)
++            print('mach_files', mach_files)
+         for path in mach_files:
+             mach = Mach()
+             mach.parse(path)
+diff -ru lldb-8.0.0.src.orig/examples/python/memory.py lldb-8.0.0.src/examples/python/memory.py
+--- lldb-8.0.0.src.orig/examples/python/memory.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/memory.py	2019-03-26 18:04:31.872637403 +0000
+@@ -9,7 +9,7 @@
+ #   (lldb) command script import /path/to/cmdtemplate.py
+ #----------------------------------------------------------------------
+ 
+-import commands
++import subprocess
+ import platform
+ import os
+ import re
+@@ -24,7 +24,7 @@
+     platform_system = platform.system()
+     if platform_system == 'Darwin':
+         # On Darwin, try the currently selected Xcode directory
+-        xcode_dir = commands.getoutput("xcode-select --print-path")
++        xcode_dir = subprocess.getoutput("xcode-select --print-path")
+         if xcode_dir:
+             lldb_python_dirs.append(
+                 os.path.realpath(
+@@ -44,14 +44,14 @@
+                 except ImportError:
+                     pass
+                 else:
+-                    print 'imported lldb from: "%s"' % (lldb_python_dir)
++                    print('imported lldb from: "%s"' % (lldb_python_dir))
+                     success = True
+                     break
+     if not success:
+-        print "error: couldn't locate the 'lldb' module, please set PYTHONPATH correctly"
++        print("error: couldn't locate the 'lldb' module, please set PYTHONPATH correctly")
+         sys.exit(1)
+ 
+-import commands
++import subprocess
+ import optparse
+ import shlex
+ import string
+@@ -197,9 +197,9 @@
+ 
+ 
+ def print_error(str, show_usage, result):
+-    print >>result, str
++    print(str, file=result)
+     if show_usage:
+-        print >>result, create_memfind_options().format_help()
++        print(create_memfind_options().format_help(), file=result)
+ 
+ 
+ def memfind(target, options, args, result):
+@@ -233,44 +233,44 @@
+         return
+ 
+     if not options.data:
+-        print >>result, 'error: no data specified to search for'
++        print('error: no data specified to search for', file=result)
+         return
+ 
+     if not target:
+-        print >>result, 'error: invalid target'
++        print('error: invalid target', file=result)
+         return
+     process = target.process
+     if not process:
+-        print >>result, 'error: invalid process'
++        print('error: invalid process', file=result)
+         return
+ 
+     error = lldb.SBError()
+     bytes = process.ReadMemory(start_addr, options.size, error)
+     if error.Success():
+         num_matches = 0
+-        print >>result, "Searching memory range [%#x - %#x) for" % (
+-            start_addr, end_addr),
++        print("Searching memory range [%#x - %#x) for" % (
++            start_addr, end_addr), end=' ', file=result)
+         for byte in options.data:
+-            print >>result, '%2.2x' % ord(byte),
+-        print >>result
++            print('%2.2x' % ord(byte), end=' ', file=result)
++        print(file=result)
+ 
+         match_index = string.find(bytes, options.data)
+         while match_index != -1:
+             num_matches = num_matches + 1
+-            print >>result, '%#x: %#x + %u' % (start_addr +
+-                                               match_index, start_addr, match_index)
++            print('%#x: %#x + %u' % (start_addr +
++                                               match_index, start_addr, match_index), file=result)
+             match_index = string.find(bytes, options.data, match_index + 1)
+ 
+         if num_matches == 0:
+-            print >>result, "error: no matches found"
++            print("error: no matches found", file=result)
+     else:
+-        print >>result, 'error: %s' % (error.GetCString())
++        print('error: %s' % (error.GetCString()), file=result)
+ 
+ 
+ if __name__ == '__main__':
+-    print 'error: this script is designed to be used within the embedded script interpreter in LLDB'
++    print('error: this script is designed to be used within the embedded script interpreter in LLDB')
+ elif getattr(lldb, 'debugger', None):
+     memfind_command.__doc__ = create_memfind_options().format_help()
+     lldb.debugger.HandleCommand(
+         'command script add -f memory.memfind_command memfind')
+-    print '"memfind" command installed, use the "--help" option for detailed help'
++    print('"memfind" command installed, use the "--help" option for detailed help')
+diff -ru lldb-8.0.0.src.orig/examples/python/performance.py lldb-8.0.0.src/examples/python/performance.py
+--- lldb-8.0.0.src.orig/examples/python/performance.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/performance.py	2019-03-26 18:04:27.960581606 +0000
+@@ -8,7 +8,7 @@
+ #   export PYTHONPATH=/Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Resources/Python
+ #----------------------------------------------------------------------
+ 
+-import commands
++import subprocess
+ import optparse
+ import os
+ import platform
+@@ -30,7 +30,7 @@
+     platform_system = platform.system()
+     if platform_system == 'Darwin':
+         # On Darwin, try the currently selected Xcode directory
+-        xcode_dir = commands.getoutput("xcode-select --print-path")
++        xcode_dir = subprocess.getoutput("xcode-select --print-path")
+         if xcode_dir:
+             lldb_python_dirs.append(
+                 os.path.realpath(
+@@ -50,11 +50,11 @@
+                 except ImportError:
+                     pass
+                 else:
+-                    print 'imported lldb from: "%s"' % (lldb_python_dir)
++                    print('imported lldb from: "%s"' % (lldb_python_dir))
+                     success = True
+                     break
+     if not success:
+-        print "error: couldn't locate the 'lldb' module, please set PYTHONPATH correctly"
++        print("error: couldn't locate the 'lldb' module, please set PYTHONPATH correctly")
+         sys.exit(1)
+ 
+ 
+@@ -116,20 +116,20 @@
+             self.breakpoints.append(breakpoint)
+         else:
+             if module:
+-                if isinstance(module, types.ListType):
++                if isinstance(module, list):
+                     for module_path in module:
+                         self.modules.Append(
+                             lldb.SBFileSpec(module_path, False))
+-                elif isinstance(module, types.StringTypes):
++                elif isinstance(module, (str,)):
+                     self.modules.Append(lldb.SBFileSpec(module, False))
+             if name:
+                 # "file" can be a list or a string
+                 if file:
+-                    if isinstance(file, types.ListType):
++                    if isinstance(file, list):
+                         self.files = lldb.SBFileSpecList()
+                         for f in file:
+                             self.files.Append(lldb.SBFileSpec(f, False))
+-                    elif isinstance(file, types.StringTypes):
++                    elif isinstance(file, (str,)):
+                         self.files.Append(lldb.SBFileSpec(file, False))
+                 self.breakpoints.append(
+                     self.target.BreakpointCreateByName(
+@@ -179,7 +179,7 @@
+             error = lldb.SBError()
+             self.process = self.target.Launch(self.launch_info, error)
+             if not error.Success():
+-                print "error: %s" % error.GetCString()
++                print("error: %s" % error.GetCString())
+             if self.process:
+                 self.process.GetBroadcaster().AddListener(self.listener,
+                                                           lldb.SBProcess.eBroadcastBitStateChanged | lldb.SBProcess.eBroadcastBitInterrupt)
+@@ -194,7 +194,7 @@
+                 if self.listener.WaitForEvent(lldb.UINT32_MAX, process_event):
+                     state = lldb.SBProcess.GetStateFromEvent(process_event)
+                     if self.verbose:
+-                        print "event = %s" % (lldb.SBDebugger.StateAsCString(state))
++                        print("event = %s" % (lldb.SBDebugger.StateAsCString(state)))
+                     if lldb.SBProcess.GetRestartedFromEvent(process_event):
+                         continue
+                     if state == lldb.eStateInvalid or state == lldb.eStateDetached or state == lldb.eStateCrashed or state == lldb.eStateUnloaded or state == lldb.eStateExited:
+@@ -213,46 +213,46 @@
+ 
+                             stop_reason = thread.GetStopReason()
+                             if self.verbose:
+-                                print "tid = %#x pc = %#x " % (thread.GetThreadID(), frame.GetPC()),
++                                print("tid = %#x pc = %#x " % (thread.GetThreadID(), frame.GetPC()), end=' ')
+                             if stop_reason == lldb.eStopReasonNone:
+                                 if self.verbose:
+-                                    print "none"
++                                    print("none")
+                             elif stop_reason == lldb.eStopReasonTrace:
+                                 select_thread = True
+                                 if self.verbose:
+-                                    print "trace"
++                                    print("trace")
+                             elif stop_reason == lldb.eStopReasonPlanComplete:
+                                 select_thread = True
+                                 if self.verbose:
+-                                    print "plan complete"
++                                    print("plan complete")
+                             elif stop_reason == lldb.eStopReasonThreadExiting:
+                                 if self.verbose:
+-                                    print "thread exiting"
++                                    print("thread exiting")
+                             elif stop_reason == lldb.eStopReasonExec:
+                                 if self.verbose:
+-                                    print "exec"
++                                    print("exec")
+                             elif stop_reason == lldb.eStopReasonInvalid:
+                                 if self.verbose:
+-                                    print "invalid"
++                                    print("invalid")
+                             elif stop_reason == lldb.eStopReasonException:
+                                 select_thread = True
+                                 if self.verbose:
+-                                    print "exception"
++                                    print("exception")
+                                 fatal = True
+                             elif stop_reason == lldb.eStopReasonBreakpoint:
+                                 select_thread = True
+                                 bp_id = thread.GetStopReasonDataAtIndex(0)
+                                 bp_loc_id = thread.GetStopReasonDataAtIndex(1)
+                                 if self.verbose:
+-                                    print "breakpoint id = %d.%d" % (bp_id, bp_loc_id)
++                                    print("breakpoint id = %d.%d" % (bp_id, bp_loc_id))
+                             elif stop_reason == lldb.eStopReasonWatchpoint:
+                                 select_thread = True
+                                 if self.verbose:
+-                                    print "watchpoint id = %d" % (thread.GetStopReasonDataAtIndex(0))
++                                    print("watchpoint id = %d" % (thread.GetStopReasonDataAtIndex(0)))
+                             elif stop_reason == lldb.eStopReasonSignal:
+                                 select_thread = True
+                                 if self.verbose:
+-                                    print "signal %d" % (thread.GetStopReasonDataAtIndex(0))
++                                    print("signal %d" % (thread.GetStopReasonDataAtIndex(0)))
+ 
+                             if select_thread and not selected_thread:
+                                 self.thread = thread
+@@ -301,7 +301,7 @@
+         self.value = dict()
+ 
+     def Measure(self):
+-        output = commands.getoutput(self.command).split("\n")[-1]
++        output = subprocess.getoutput(self.command).split("\n")[-1]
+         values = re.split('[-+\s]+', output)
+         for (idx, stat) in enumerate(values):
+             multiplier = 1
+@@ -322,7 +322,7 @@
+     def __str__(self):
+         '''Dump the MemoryMeasurement current value'''
+         s = ''
+-        for key in self.value.keys():
++        for key in list(self.value.keys()):
+             if s:
+                 s += "\n"
+             s += "%8s = %s" % (key, self.value[key])
+@@ -339,7 +339,7 @@
+     def BreakpointHit(self, thread):
+         bp_id = thread.GetStopReasonDataAtIndex(0)
+         loc_id = thread.GetStopReasonDataAtIndex(1)
+-        print "Breakpoint %i.%i hit: %s" % (bp_id, loc_id, thread.process.target.FindBreakpointByID(bp_id))
++        print("Breakpoint %i.%i hit: %s" % (bp_id, loc_id, thread.process.target.FindBreakpointByID(bp_id)))
+         thread.StepOver()
+ 
+     def PlanComplete(self, thread):
+@@ -356,9 +356,9 @@
+             if self.target:
+                 with Timer() as breakpoint_timer:
+                     bp = self.target.BreakpointCreateByName("main")
+-                print(
++                print((
+                     'Breakpoint time = %.03f sec.' %
+-                    breakpoint_timer.interval)
++                    breakpoint_timer.interval))
+ 
+                 self.user_actions.append(
+                     BreakpointAction(
+@@ -374,10 +374,10 @@
+                     while not self.done:
+                         self.WaitForNextProcessEvent()
+                 else:
+-                    print "error: failed to launch process"
++                    print("error: failed to launch process")
+             else:
+-                print "error: failed to create target with '%s'" % (args[0])
+-        print('Total time = %.03f sec.' % total_time.interval)
++                print("error: failed to create target with '%s'" % (args[0]))
++        print(('Total time = %.03f sec.' % total_time.interval))
+ 
+ 
+ if __name__ == '__main__':
+@@ -386,7 +386,7 @@
+     test.Run(sys.argv[1:])
+     mem = MemoryMeasurement(os.getpid())
+     mem.Measure()
+-    print str(mem)
++    print(str(mem))
+     lldb.SBDebugger.Terminate()
+     # print "sleeeping for 100 seconds"
+     # time.sleep(100)
+diff -ru lldb-8.0.0.src.orig/examples/python/process_events.py lldb-8.0.0.src/examples/python/process_events.py
+--- lldb-8.0.0.src.orig/examples/python/process_events.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/process_events.py	2019-03-26 18:04:26.360558785 +0000
+@@ -8,7 +8,7 @@
+ #   export PYTHONPATH=/Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Resources/Python
+ #----------------------------------------------------------------------
+ 
+-import commands
++import subprocess
+ import optparse
+ import os
+ import platform
+@@ -26,7 +26,7 @@
+     platform_system = platform.system()
+     if platform_system == 'Darwin':
+         # On Darwin, try the currently selected Xcode directory
+-        xcode_dir = commands.getoutput("xcode-select --print-path")
++        xcode_dir = subprocess.getoutput("xcode-select --print-path")
+         if xcode_dir:
+             lldb_python_dirs.append(
+                 os.path.realpath(
+@@ -46,18 +46,18 @@
+                 except ImportError:
+                     pass
+                 else:
+-                    print 'imported lldb from: "%s"' % (lldb_python_dir)
++                    print('imported lldb from: "%s"' % (lldb_python_dir))
+                     success = True
+                     break
+     if not success:
+-        print "error: couldn't locate the 'lldb' module, please set PYTHONPATH correctly"
++        print("error: couldn't locate the 'lldb' module, please set PYTHONPATH correctly")
+         sys.exit(1)
+ 
+ 
+ def print_threads(process, options):
+     if options.show_threads:
+         for thread in process:
+-            print '%s %s' % (thread, thread.GetFrameAtIndex(0))
++            print('%s %s' % (thread, thread.GetFrameAtIndex(0)))
+ 
+ 
+ def run_commands(command_interpreter, commands):
+@@ -65,9 +65,9 @@
+     for command in commands:
+         command_interpreter.HandleCommand(command, return_obj)
+         if return_obj.Succeeded():
+-            print return_obj.GetOutput()
++            print(return_obj.GetOutput())
+         else:
+-            print return_obj
++            print(return_obj)
+             if options.stop_on_error:
+                 break
+ 
+@@ -241,17 +241,17 @@
+         if options.run_count == 1:
+             attach_info = lldb.SBAttachInfo(options.attach_pid)
+         else:
+-            print "error: --run-count can't be used with the --attach-pid option"
++            print("error: --run-count can't be used with the --attach-pid option")
+             sys.exit(1)
+     elif not options.attach_name is None:
+         if options.run_count == 1:
+             attach_info = lldb.SBAttachInfo(
+                 options.attach_name, options.attach_wait)
+         else:
+-            print "error: --run-count can't be used with the --attach-name option"
++            print("error: --run-count can't be used with the --attach-name option")
+             sys.exit(1)
+     else:
+-        print 'error: a program path for a program to debug and its arguments are required'
++        print('error: a program path for a program to debug and its arguments are required')
+         sys.exit(1)
+ 
+     # Create a new debugger instance
+@@ -261,7 +261,7 @@
+     # Create a target from a file and arch
+ 
+     if exe:
+-        print "Creating a target for '%s'" % exe
++        print("Creating a target for '%s'" % exe)
+     error = lldb.SBError()
+     target = debugger.CreateTarget(
+         exe, options.arch, options.platform, True, error)
+@@ -283,26 +283,26 @@
+ 
+             if launch_info:
+                 if options.run_count == 1:
+-                    print 'Launching "%s"...' % (exe)
++                    print('Launching "%s"...' % (exe))
+                 else:
+-                    print 'Launching "%s"... (launch %u of %u)' % (exe, run_idx + 1, options.run_count)
++                    print('Launching "%s"... (launch %u of %u)' % (exe, run_idx + 1, options.run_count))
+ 
+                 process = target.Launch(launch_info, error)
+             else:
+                 if options.attach_pid != -1:
+-                    print 'Attaching to process %i...' % (options.attach_pid)
++                    print('Attaching to process %i...' % (options.attach_pid))
+                 else:
+                     if options.attach_wait:
+-                        print 'Waiting for next to process named "%s" to launch...' % (options.attach_name)
++                        print('Waiting for next to process named "%s" to launch...' % (options.attach_name))
+                     else:
+-                        print 'Attaching to existing process named "%s"...' % (options.attach_name)
++                        print('Attaching to existing process named "%s"...' % (options.attach_name))
+                 process = target.Attach(attach_info, error)
+ 
+             # Make sure the launch went ok
+             if process and process.GetProcessID() != lldb.LLDB_INVALID_PROCESS_ID:
+ 
+                 pid = process.GetProcessID()
+-                print 'Process is %i' % (pid)
++                print('Process is %i' % (pid))
+                 if attach_info:
+                     # continue process if we attached as we won't get an
+                     # initial event
+@@ -319,19 +319,19 @@
+                             state = lldb.SBProcess.GetStateFromEvent(event)
+                             if state == lldb.eStateInvalid:
+                                 # Not a state event
+-                                print 'process event = %s' % (event)
++                                print('process event = %s' % (event))
+                             else:
+-                                print "process state changed event: %s" % (lldb.SBDebugger.StateAsCString(state))
++                                print("process state changed event: %s" % (lldb.SBDebugger.StateAsCString(state)))
+                                 if state == lldb.eStateStopped:
+                                     if stop_idx == 0:
+                                         if launch_info:
+-                                            print "process %u launched" % (pid)
++                                            print("process %u launched" % (pid))
+                                             run_commands(
+                                                 command_interpreter, ['breakpoint list'])
+                                         else:
+-                                            print "attached to process %u" % (pid)
++                                            print("attached to process %u" % (pid))
+                                             for m in target.modules:
+-                                                print m
++                                                print(m)
+                                             if options.breakpoints:
+                                                 for bp in options.breakpoints:
+                                                     debugger.HandleCommand(
+@@ -342,74 +342,74 @@
+                                             command_interpreter, options.launch_commands)
+                                     else:
+                                         if options.verbose:
+-                                            print "process %u stopped" % (pid)
++                                            print("process %u stopped" % (pid))
+                                         run_commands(
+                                             command_interpreter, options.stop_commands)
+                                     stop_idx += 1
+                                     print_threads(process, options)
+-                                    print "continuing process %u" % (pid)
++                                    print("continuing process %u" % (pid))
+                                     process.Continue()
+                                 elif state == lldb.eStateExited:
+                                     exit_desc = process.GetExitDescription()
+                                     if exit_desc:
+-                                        print "process %u exited with status %u: %s" % (pid, process.GetExitStatus(), exit_desc)
++                                        print("process %u exited with status %u: %s" % (pid, process.GetExitStatus(), exit_desc))
+                                     else:
+-                                        print "process %u exited with status %u" % (pid, process.GetExitStatus())
++                                        print("process %u exited with status %u" % (pid, process.GetExitStatus()))
+                                     run_commands(
+                                         command_interpreter, options.exit_commands)
+                                     done = True
+                                 elif state == lldb.eStateCrashed:
+-                                    print "process %u crashed" % (pid)
++                                    print("process %u crashed" % (pid))
+                                     print_threads(process, options)
+                                     run_commands(
+                                         command_interpreter, options.crash_commands)
+                                     done = True
+                                 elif state == lldb.eStateDetached:
+-                                    print "process %u detached" % (pid)
++                                    print("process %u detached" % (pid))
+                                     done = True
+                                 elif state == lldb.eStateRunning:
+                                     # process is running, don't say anything,
+                                     # we will always get one of these after
+                                     # resuming
+                                     if options.verbose:
+-                                        print "process %u resumed" % (pid)
++                                        print("process %u resumed" % (pid))
+                                 elif state == lldb.eStateUnloaded:
+-                                    print "process %u unloaded, this shouldn't happen" % (pid)
++                                    print("process %u unloaded, this shouldn't happen" % (pid))
+                                     done = True
+                                 elif state == lldb.eStateConnected:
+-                                    print "process connected"
++                                    print("process connected")
+                                 elif state == lldb.eStateAttaching:
+-                                    print "process attaching"
++                                    print("process attaching")
+                                 elif state == lldb.eStateLaunching:
+-                                    print "process launching"
++                                    print("process launching")
+                         else:
+-                            print 'event = %s' % (event)
++                            print('event = %s' % (event))
+                     else:
+                         # timeout waiting for an event
+-                        print "no process event for %u seconds, killing the process..." % (options.event_timeout)
++                        print("no process event for %u seconds, killing the process..." % (options.event_timeout))
+                         done = True
+                 # Now that we are done dump the stdout and stderr
+                 process_stdout = process.GetSTDOUT(1024)
+                 if process_stdout:
+-                    print "Process STDOUT:\n%s" % (process_stdout)
++                    print("Process STDOUT:\n%s" % (process_stdout))
+                     while process_stdout:
+                         process_stdout = process.GetSTDOUT(1024)
+-                        print process_stdout
++                        print(process_stdout)
+                 process_stderr = process.GetSTDERR(1024)
+                 if process_stderr:
+-                    print "Process STDERR:\n%s" % (process_stderr)
++                    print("Process STDERR:\n%s" % (process_stderr))
+                     while process_stderr:
+                         process_stderr = process.GetSTDERR(1024)
+-                        print process_stderr
++                        print(process_stderr)
+                 process.Kill()  # kill the process
+             else:
+                 if error:
+-                    print error
++                    print(error)
+                 else:
+                     if launch_info:
+-                        print 'error: launch failed'
++                        print('error: launch failed')
+                     else:
+-                        print 'error: attach failed'
++                        print('error: attach failed')
+ 
+     lldb.SBDebugger.Terminate()
+ 
+diff -ru lldb-8.0.0.src.orig/examples/python/pytracer.py lldb-8.0.0.src/examples/python/pytracer.py
+--- lldb-8.0.0.src.orig/examples/python/pytracer.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/pytracer.py	2019-03-26 18:04:37.659719943 +0000
+@@ -40,7 +40,7 @@
+     def getTraceback(self):
+         return TracebackFancy(self.etraceback)
+ 
+-    def __nonzero__(self):
++    def __bool__(self):
+         return self.etraceback is not None or self.etype is not None or self.evalue is not None
+ 
+     def getType(self):
+@@ -229,17 +229,17 @@
+ class LoggingTracer:
+ 
+     def callEvent(self, frame):
+-        print "call " + frame.getName() + " from " + frame.getCaller().getName() + " @ " + str(frame.getCaller().getLineNumber()) + " args are " + str(frame.getArgumentInfo())
++        print("call " + frame.getName() + " from " + frame.getCaller().getName() + " @ " + str(frame.getCaller().getLineNumber()) + " args are " + str(frame.getArgumentInfo()))
+ 
+     def lineEvent(self, frame):
+-        print "running " + frame.getName() + " @ " + str(frame.getLineNumber()) + " locals are " + str(frame.getLocals()) + " in " + frame.getFileName()
++        print("running " + frame.getName() + " @ " + str(frame.getLineNumber()) + " locals are " + str(frame.getLocals()) + " in " + frame.getFileName())
+ 
+     def returnEvent(self, frame, retval):
+-        print "return from " + frame.getName() + " value is " + str(retval) + " locals are " + str(frame.getLocals())
++        print("return from " + frame.getName() + " value is " + str(retval) + " locals are " + str(frame.getLocals()))
+ 
+     def exceptionEvent(self, frame, exception):
+-        print "exception %s %s raised from %s @ %s" % (exception.getType(), str(exception.getValue()), frame.getName(), frame.getLineNumber())
+-        print "tb: " + str(exception.getTraceback())
++        print("exception %s %s raised from %s @ %s" % (exception.getType(), str(exception.getValue()), frame.getName(), frame.getLineNumber()))
++        print("tb: " + str(exception.getTraceback()))
+ 
+ # the same functionality as LoggingTracer, but with a little more
+ # lldb-specific smarts
+@@ -251,10 +251,10 @@
+         if frame.getName() == "<module>":
+             return
+         if frame.getName() == "run_one_line":
+-            print "call run_one_line(%s)" % (frame.getArgumentInfo().getArgs()["input_string"])
++            print("call run_one_line(%s)" % (frame.getArgumentInfo().getArgs()["input_string"]))
+             return
+         if "Python.framework" in frame.getFileName():
+-            print "call into Python at " + frame.getName()
++            print("call into Python at " + frame.getName())
+             return
+         if frame.getName() == "__init__" and frame.getCaller().getName(
+         ) == "run_one_line" and frame.getCaller().getLineNumber() == 101:
+@@ -270,16 +270,16 @@
+         else:
+             strout += " from " + frame.getCaller().getName() + " @ " + \
+                 str(frame.getCaller().getLineNumber()) + " args are " + str(frame.getArgumentInfo())
+-        print strout
++        print(strout)
+ 
+     def lineEvent(self, frame):
+         if frame.getName() == "<module>":
+             return
+         if frame.getName() == "run_one_line":
+-            print "running run_one_line(%s) @ %s" % (frame.getArgumentInfo().getArgs()["input_string"], frame.getLineNumber())
++            print("running run_one_line(%s) @ %s" % (frame.getArgumentInfo().getArgs()["input_string"], frame.getLineNumber()))
+             return
+         if "Python.framework" in frame.getFileName():
+-            print "running into Python at " + frame.getName() + " @ " + str(frame.getLineNumber())
++            print("running into Python at " + frame.getName() + " @ " + str(frame.getLineNumber()))
+             return
+         strout = "running " + frame.getName() + " @ " + str(frame.getLineNumber()) + \
+             " locals are "
+@@ -292,16 +292,16 @@
+         else:
+             strout = strout + str(frame.getLocals())
+         strout = strout + " in " + frame.getFileName()
+-        print strout
++        print(strout)
+ 
+     def returnEvent(self, frame, retval):
+         if frame.getName() == "<module>":
+             return
+         if frame.getName() == "run_one_line":
+-            print "return from run_one_line(%s) return value is %s" % (frame.getArgumentInfo().getArgs()["input_string"], retval)
++            print("return from run_one_line(%s) return value is %s" % (frame.getArgumentInfo().getArgs()["input_string"], retval))
+             return
+         if "Python.framework" in frame.getFileName():
+-            print "return from Python at " + frame.getName() + " return value is " + str(retval)
++            print("return from Python at " + frame.getName() + " return value is " + str(retval))
+             return
+         strout = "return from " + frame.getName() + " return value is " + \
+             str(retval) + " locals are "
+@@ -314,13 +314,13 @@
+         else:
+             strout = strout + str(frame.getLocals())
+         strout = strout + " in " + frame.getFileName()
+-        print strout
++        print(strout)
+ 
+     def exceptionEvent(self, frame, exception):
+         if frame.getName() == "<module>":
+             return
+-        print "exception %s %s raised from %s @ %s" % (exception.getType(), str(exception.getValue()), frame.getName(), frame.getLineNumber())
+-        print "tb: " + str(exception.getTraceback())
++        print("exception %s %s raised from %s @ %s" % (exception.getType(), str(exception.getValue()), frame.getName(), frame.getLineNumber()))
++        print("tb: " + str(exception.getTraceback()))
+ 
+ 
+ def f(x, y=None):
+@@ -335,8 +335,8 @@
+ 
+ def print_keyword_args(**kwargs):
+     # kwargs is a dict of the keyword args passed to the function
+-    for key, value in kwargs.iteritems():
+-        print "%s = %s" % (key, value)
++    for key, value in kwargs.items():
++        print("%s = %s" % (key, value))
+ 
+ 
+ def total(initial=5, *numbers, **keywords):
+diff -ru lldb-8.0.0.src.orig/examples/python/sbvalue.py lldb-8.0.0.src/examples/python/sbvalue.py
+--- lldb-8.0.0.src.orig/examples/python/sbvalue.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/sbvalue.py	2019-03-26 18:04:26.003553693 +0000
+@@ -29,7 +29,7 @@
+     def __init__(self, sbvalue):
+         self.sbvalue = sbvalue
+ 
+-    def __nonzero__(self):
++    def __bool__(self):
+         return self.sbvalue.__nonzero__()
+ 
+     def __repr__(self):
+@@ -101,7 +101,7 @@
+     def __init__(self, sbvalue):
+         self.sbvalue = sbvalue
+ 
+-    def __nonzero__(self):
++    def __bool__(self):
+         return self.sbvalue.__nonzero__()
+ 
+     def __repr__(self):
+diff -ru lldb-8.0.0.src.orig/examples/python/scripted_step.py lldb-8.0.0.src/examples/python/scripted_step.py
+--- lldb-8.0.0.src.orig/examples/python/scripted_step.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/scripted_step.py	2019-03-26 18:04:30.444617035 +0000
+@@ -186,13 +186,13 @@
+         a_var = frame.FindVariable("a")
+ 
+         if not a_var.IsValid():
+-            print "A was not valid."
++            print("A was not valid.")
+             return True
+ 
+         error = lldb.SBError()
+         a_value = a_var.GetValueAsSigned(error)
+         if not error.Success():
+-            print "A value was not good."
++            print("A value was not good.")
+             return True
+ 
+         if a_value == 20:
+@@ -239,6 +239,6 @@
+         frame_0 = self.thread.frames[0]
+         rax_value = frame_0.FindRegister("rax")
+         if rax_value.GetError().Success():
+-            print "RAX on exit: ", rax_value.GetValue()
++            print("RAX on exit: ", rax_value.GetValue())
+         else:
+-            print "Couldn't get rax value:", rax_value.GetError().GetCString()
++            print("Couldn't get rax value:", rax_value.GetError().GetCString())
+diff -ru lldb-8.0.0.src.orig/examples/python/shadow.py lldb-8.0.0.src/examples/python/shadow.py
+--- lldb-8.0.0.src.orig/examples/python/shadow.py	2019-03-26 17:36:55.200323102 +0000
++++ lldb-8.0.0.src/examples/python/shadow.py	2019-03-26 18:04:36.831708133 +0000
+@@ -10,12 +10,12 @@
+     process = exe_ctx.GetProcess()
+     state = process.GetState()
+     if state != lldb.eStateStopped:
+-        print >>result, "process must be stopped, state is %s" % lldb.SBDebugger.StateAsCString(
+-            state)
++        print("process must be stopped, state is %s" % lldb.SBDebugger.StateAsCString(
++            state), file=result)
+         return
+     frame = exe_ctx.GetFrame()
+     if not frame:
+-        print >>result, "invalid frame"
++        print("invalid frame", file=result)
+         return
+     # Parse command line args
+     command_args = shlex.split(command)
+@@ -47,12 +47,12 @@
+ 
+     num_shadowed_variables = 0
+     if shadow_dict:
+-        for name in shadow_dict.keys():
++        for name in list(shadow_dict.keys()):
+             shadow_vars = shadow_dict[name]
+             if len(shadow_vars) > 1:
+-                print '"%s" is shadowed by the following declarations:' % (name)
++                print('"%s" is shadowed by the following declarations:' % (name))
+                 num_shadowed_variables += 1
+                 for shadow_var in shadow_vars:
+-                    print >>result, str(shadow_var.GetDeclaration())
++                    print(str(shadow_var.GetDeclaration()), file=result)
+     if num_shadowed_variables == 0:
+-        print >>result, 'no variables are shadowed'
++        print('no variables are shadowed', file=result)
+diff -ru lldb-8.0.0.src.orig/examples/python/sources.py lldb-8.0.0.src/examples/python/sources.py
+--- lldb-8.0.0.src.orig/examples/python/sources.py	2019-03-26 17:36:55.200323102 +0000
++++ lldb-8.0.0.src/examples/python/sources.py	2019-03-26 18:04:30.166613070 +0000
+@@ -6,10 +6,10 @@
+ 
+ def dump_module_sources(module, result):
+     if module:
+-        print >> result, "Module: %s" % (module.file)
++        print("Module: %s" % (module.file), file=result)
+         for compile_unit in module.compile_units:
+             if compile_unit.file:
+-                print >> result, "  %s" % (compile_unit.file)
++                print("  %s" % (compile_unit.file), file=result)
+ 
+ 
+ def info_sources(debugger, command, result, dict):
+@@ -28,4 +28,4 @@
+     # Add any commands contained in this module to LLDB
+     debugger.HandleCommand(
+         'command script add -f sources.info_sources info_sources')
+-    print 'The "info_sources" command has been installed, type "help info_sources" or "info_sources --help" for detailed help.'
++    print('The "info_sources" command has been installed, type "help info_sources" or "info_sources --help" for detailed help.')
+diff -ru lldb-8.0.0.src.orig/examples/python/stacks.py lldb-8.0.0.src/examples/python/stacks.py
+--- lldb-8.0.0.src.orig/examples/python/stacks.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/stacks.py	2019-03-26 18:04:38.223727987 +0000
+@@ -1,7 +1,7 @@
+ #!/usr/bin/python
+ 
+ import lldb
+-import commands
++import subprocess
+ import optparse
+ import shlex
+ 
+@@ -30,7 +30,7 @@
+     frame_info = {}
+     for thread in process:
+         last_frame = None
+-        print "thread %u" % (thread.id)
++        print("thread %u" % (thread.id))
+         for frame in thread.frames:
+             if last_frame:
+                 frame_size = 0
+@@ -43,7 +43,7 @@
+                     else:
+                         # First frame that has a valid size
+                         first_frame_size = last_frame.fp - last_frame.sp
+-                    print "<%#7x> %s" % (first_frame_size, last_frame)
++                    print("<%#7x> %s" % (first_frame_size, last_frame))
+                     if first_frame_size:
+                         name = last_frame.name
+                         if name not in frame_info:
+@@ -53,7 +53,7 @@
+                 else:
+                     # Second or higher frame
+                     frame_size = frame.fp - last_frame.fp
+-                print "<%#7x> %s" % (frame_size, frame)
++                print("<%#7x> %s" % (frame_size, frame))
+                 if frame_size > 0:
+                     name = frame.name
+                     if name not in frame_info:
+@@ -61,9 +61,9 @@
+                     else:
+                         frame_info[name] += frame_size
+             last_frame = frame
+-    print frame_info
++    print(frame_info)
+ 
+ 
+ lldb.debugger.HandleCommand(
+     "command script add -f stacks.stack_frames stack_frames")
+-print "A new command called 'stack_frames' was added, type 'stack_frames --help' for more information."
++print("A new command called 'stack_frames' was added, type 'stack_frames --help' for more information.")
+diff -ru lldb-8.0.0.src.orig/examples/python/symbolication.py lldb-8.0.0.src/examples/python/symbolication.py
+--- lldb-8.0.0.src.orig/examples/python/symbolication.py	2019-03-26 17:36:55.200323102 +0000
++++ lldb-8.0.0.src/examples/python/symbolication.py	2019-03-26 18:04:29.373601759 +0000
+@@ -27,7 +27,7 @@
+ #----------------------------------------------------------------------
+ 
+ import lldb
+-import commands
++import subprocess
+ import optparse
+ import os
+ import plistlib
+@@ -203,13 +203,13 @@
+                 if op == '+':
+                     self.end_addr += self.start_addr
+                 return True
+-        print 'error: invalid section info string "%s"' % s
+-        print 'Valid section info formats are:'
+-        print 'Format                Example                    Description'
+-        print '--------------------- -----------------------------------------------'
+-        print '<name>=<base>        __TEXT=0x123000             Section from base address only'
+-        print '<name>=<base>-<end>  __TEXT=0x123000-0x124000    Section from base address and end address'
+-        print '<name>=<base>+<size> __TEXT=0x123000+0x1000      Section from base address and size'
++        print('error: invalid section info string "%s"' % s)
++        print('Valid section info formats are:')
++        print('Format                Example                    Description')
++        print('--------------------- -----------------------------------------------')
++        print('<name>=<base>        __TEXT=0x123000             Section from base address only')
++        print('<name>=<base>-<end>  __TEXT=0x123000-0x124000    Section from base address and end address')
++        print('<name>=<base>+<size> __TEXT=0x123000+0x1000      Section from base address and size')
+         return False
+ 
+     def __str__(self):
+@@ -261,21 +261,21 @@
+         return obj
+ 
+     def dump(self, prefix):
+-        print "%s%s" % (prefix, self)
++        print("%s%s" % (prefix, self))
+ 
+     def debug_dump(self):
+-        print 'path = "%s"' % (self.path)
+-        print 'resolved_path = "%s"' % (self.resolved_path)
+-        print 'resolved = %i' % (self.resolved)
+-        print 'unavailable = %i' % (self.unavailable)
+-        print 'uuid = %s' % (self.uuid)
+-        print 'section_infos = %s' % (self.section_infos)
+-        print 'identifier = "%s"' % (self.identifier)
+-        print 'version = %s' % (self.version)
+-        print 'arch = %s' % (self.arch)
+-        print 'module = %s' % (self.module)
+-        print 'symfile = "%s"' % (self.symfile)
+-        print 'slide = %i (0x%x)' % (self.slide, self.slide)
++        print('path = "%s"' % (self.path))
++        print('resolved_path = "%s"' % (self.resolved_path))
++        print('resolved = %i' % (self.resolved))
++        print('unavailable = %i' % (self.unavailable))
++        print('uuid = %s' % (self.uuid))
++        print('section_infos = %s' % (self.section_infos))
++        print('identifier = "%s"' % (self.identifier))
++        print('version = %s' % (self.version))
++        print('arch = %s' % (self.arch))
++        print('module = %s' % (self.module))
++        print('symfile = "%s"' % (self.symfile))
++        print('slide = %i (0x%x)' % (self.slide, self.slide))
+ 
+     def __str__(self):
+         s = ''
+@@ -428,12 +428,12 @@
+                 if self.has_section_load_info():
+                     err = self.load_module(target)
+                     if err:
+-                        print 'ERROR: ', err
++                        print('ERROR: ', err)
+                 return target
+             else:
+-                print 'error: unable to create a valid target for (%s) "%s"' % (self.arch, self.path)
++                print('error: unable to create a valid target for (%s) "%s"' % (self.arch, self.path))
+         else:
+-            print 'error: unable to locate main executable (%s) "%s"' % (self.arch, self.path)
++            print('error: unable to locate main executable (%s) "%s"' % (self.arch, self.path))
+         return None
+ 
+ 
+@@ -554,7 +554,7 @@
+                     if symbolicated_addresses:
+                         return symbolicated_addresses
+         else:
+-            print 'error: no target in Symbolicator'
++            print('error: no target in Symbolicator')
+         return None
+ 
+ 
+@@ -602,22 +602,22 @@
+             end_idx = inst_idx
+         for i in range(start_idx, end_idx + 1):
+             if i == pc_index:
+-                print ' -> ', lines[i]
++                print(' -> ', lines[i])
+             else:
+-                print '    ', lines[i]
++                print('    ', lines[i])
+ 
+ 
+ def print_module_section_data(section):
+-    print section
++    print(section)
+     section_data = section.GetSectionData()
+     if section_data:
+         ostream = lldb.SBStream()
+         section_data.GetDescription(ostream, section.GetFileAddress())
+-        print ostream.GetData()
++        print(ostream.GetData())
+ 
+ 
+ def print_module_section(section, depth):
+-    print section
++    print(section)
+     if depth > 0:
+         num_sub_sections = section.GetNumSubSections()
+         for sect_idx in range(num_sub_sections):
+@@ -632,7 +632,7 @@
+ 
+ def print_module_symbols(module):
+     for sym in module:
+-        print sym
++        print(sym)
+ 
+ 
+ def Symbolicate(command_args):
+@@ -709,17 +709,17 @@
+ 
+     target = symbolicator.create_target()
+     if options.verbose:
+-        print symbolicator
++        print(symbolicator)
+     if target:
+         for addr_str in args:
+             addr = int(addr_str, 0)
+             symbolicated_addrs = symbolicator.symbolicate(
+                 addr, options.verbose)
+             for symbolicated_addr in symbolicated_addrs:
+-                print symbolicated_addr
+-            print
++                print(symbolicated_addr)
++            print()
+     else:
+-        print 'error: no target for %s' % (symbolicator)
++        print('error: no target for %s' % (symbolicator))
+ 
+ if __name__ == '__main__':
+     # Create a new debugger instance
+diff -ru lldb-8.0.0.src.orig/examples/python/types.py lldb-8.0.0.src/examples/python/types.py
+--- lldb-8.0.0.src.orig/examples/python/types.py	2019-03-26 17:36:55.201323116 +0000
++++ lldb-8.0.0.src/examples/python/types.py	2019-03-26 18:04:31.529632511 +0000
+@@ -9,7 +9,7 @@
+ #   (lldb) command script import /path/to/cmdtemplate.py
+ #----------------------------------------------------------------------
+ 
+-import commands
++import subprocess
+ import platform
+ import os
+ import re
+@@ -25,7 +25,7 @@
+     platform_system = platform.system()
+     if platform_system == 'Darwin':
+         # On Darwin, try the currently selected Xcode directory
+-        xcode_dir = commands.getoutput("xcode-select --print-path")
++        xcode_dir = subprocess.getoutput("xcode-select --print-path")
+         if xcode_dir:
+             lldb_python_dirs.append(
+                 os.path.realpath(
+@@ -45,14 +45,14 @@
+                 except ImportError:
+                     pass
+                 else:
+-                    print 'imported lldb from: "%s"' % (lldb_python_dir)
++                    print('imported lldb from: "%s"' % (lldb_python_dir))
+                     success = True
+                     break
+     if not success:
+-        print "error: couldn't locate the 'lldb' module, please set PYTHONPATH correctly"
++        print("error: couldn't locate the 'lldb' module, please set PYTHONPATH correctly")
+         sys.exit(1)
+ 
+-import commands
++import subprocess
+ import optparse
+ import shlex
+ import time
+@@ -157,7 +157,7 @@
+ 
+ 
+ def verify_type(target, options, type):
+-    print type
++    print(type)
+     typename = type.GetName()
+     # print 'type: %s' % (typename)
+     (end_offset, padding) = verify_type_recursive(
+@@ -167,11 +167,11 @@
+     #     last_member_padding = byte_size - end_offset
+     #     print '%+4u <%u> padding' % (end_offset, last_member_padding)
+     #     padding += last_member_padding
+-    print 'Total byte size: %u' % (byte_size)
+-    print 'Total pad bytes: %u' % (padding)
++    print('Total byte size: %u' % (byte_size))
++    print('Total pad bytes: %u' % (padding))
+     if padding > 0:
+-        print 'Padding percentage: %2.2f %%' % ((float(padding) / float(byte_size)) * 100.0)
+-    print
++        print('Padding percentage: %2.2f %%' % ((float(padding) / float(byte_size)) * 100.0))
++    print()
+ 
+ 
+ def verify_type_recursive(
+@@ -186,9 +186,9 @@
+     typename = type.GetName()
+     byte_size = type.GetByteSize()
+     if member_name and member_name != typename:
+-        print '%+4u <%3u> %s%s %s;' % (base_offset, byte_size, '    ' * depth, typename, member_name)
++        print('%+4u <%3u> %s%s %s;' % (base_offset, byte_size, '    ' * depth, typename, member_name))
+     else:
+-        print '%+4u {%3u} %s%s' % (base_offset, byte_size, '    ' * depth, typename)
++        print('%+4u {%3u} %s%s' % (base_offset, byte_size, '    ' * depth, typename))
+ 
+     for type_regex in options.skip_type_regexes:
+         match = type_regex.match(typename)
+@@ -211,13 +211,13 @@
+             if member_idx == 0 and member_offset == target.GetAddressByteSize(
+             ) and type.IsPolymorphicClass():
+                 ptr_size = target.GetAddressByteSize()
+-                print '%+4u <%3u> %s__vtbl_ptr_type * _vptr;' % (prev_end_offset, ptr_size, '    ' * (depth + 1))
++                print('%+4u <%3u> %s__vtbl_ptr_type * _vptr;' % (prev_end_offset, ptr_size, '    ' * (depth + 1)))
+                 prev_end_offset = ptr_size
+             else:
+                 if prev_end_offset < member_total_offset:
+                     member_padding = member_total_offset - prev_end_offset
+                     padding = padding + member_padding
+-                    print '%+4u <%3u> %s<PADDING>' % (prev_end_offset, member_padding, '    ' * (depth + 1))
++                    print('%+4u <%3u> %s<PADDING>' % (prev_end_offset, member_padding, '    ' * (depth + 1)))
+ 
+             if member_is_class_or_struct:
+                 (prev_end_offset,
+@@ -232,18 +232,18 @@
+                 prev_end_offset = member_total_offset + member_byte_size
+                 member_typename = member_type.GetName()
+                 if member.IsBitfield():
+-                    print '%+4u <%3u> %s%s:%u %s;' % (member_total_offset, member_byte_size, '    ' * (depth + 1), member_typename, member.GetBitfieldSizeInBits(), member_name)
++                    print('%+4u <%3u> %s%s:%u %s;' % (member_total_offset, member_byte_size, '    ' * (depth + 1), member_typename, member.GetBitfieldSizeInBits(), member_name))
+                 else:
+-                    print '%+4u <%3u> %s%s %s;' % (member_total_offset, member_byte_size, '    ' * (depth + 1), member_typename, member_name)
++                    print('%+4u <%3u> %s%s %s;' % (member_total_offset, member_byte_size, '    ' * (depth + 1), member_typename, member_name))
+ 
+         if prev_end_offset < byte_size:
+             last_member_padding = byte_size - prev_end_offset
+-            print '%+4u <%3u> %s<PADDING>' % (prev_end_offset, last_member_padding, '    ' * (depth + 1))
++            print('%+4u <%3u> %s<PADDING>' % (prev_end_offset, last_member_padding, '    ' * (depth + 1)))
+             padding += last_member_padding
+     else:
+         if type.IsPolymorphicClass():
+             ptr_size = target.GetAddressByteSize()
+-            print '%+4u <%3u> %s__vtbl_ptr_type * _vptr;' % (prev_end_offset, ptr_size, '    ' * (depth + 1))
++            print('%+4u <%3u> %s__vtbl_ptr_type * _vptr;' % (prev_end_offset, ptr_size, '    ' * (depth + 1)))
+             prev_end_offset = ptr_size
+         prev_end_offset = base_offset + byte_size
+ 
+@@ -274,17 +274,17 @@
+         error = lldb.SBError()
+         target = debugger.CreateTarget(f, None, None, False, error)
+         module = target.GetModuleAtIndex(0)
+-        print "Parsing all types in '%s'" % (module)
++        print("Parsing all types in '%s'" % (module))
+         types = module.GetTypes(lldb.eTypeClassClass | lldb.eTypeClassStruct)
+         for t in types:
+-            print t
+-        print ""
++            print(t)
++        print("")
+ 
+ 
+ def verify_types(target, options):
+ 
+     if not target:
+-        print 'error: invalid target'
++        print('error: invalid target')
+         return
+ 
+     modules = list()
+@@ -301,24 +301,24 @@
+ 
+     if modules:
+         for module in modules:
+-            print 'module: %s' % (module.file)
++            print('module: %s' % (module.file))
+             if options.typenames:
+                 for typename in options.typenames:
+                     types = module.FindTypes(typename)
+                     if types.GetSize():
+-                        print 'Found %u types matching "%s" in "%s"' % (len(types), typename, module.file)
++                        print('Found %u types matching "%s" in "%s"' % (len(types), typename, module.file))
+                         for type in types:
+                             verify_type(target, options, type)
+                     else:
+-                        print 'error: no type matches "%s" in "%s"' % (typename, module.file)
++                        print('error: no type matches "%s" in "%s"' % (typename, module.file))
+             else:
+                 types = module.GetTypes(
+                     lldb.eTypeClassClass | lldb.eTypeClassStruct)
+-                print 'Found %u types in "%s"' % (len(types), module.file)
++                print('Found %u types in "%s"' % (len(types), module.file))
+                 for type in types:
+                     verify_type(target, options, type)
+     else:
+-        print 'error: no modules'
++        print('error: no modules')
+ 
+ if __name__ == '__main__':
+     debugger = lldb.SBDebugger.Create()
+@@ -331,7 +331,7 @@
+     #     sys.exit(1)
+ 
+     if options.debug:
+-        print "Waiting for debugger to attach to process %d" % os.getpid()
++        print("Waiting for debugger to attach to process %d" % os.getpid())
+         os.kill(os.getpid(), signal.SIGSTOP)
+ 
+     for path in args:
+@@ -346,11 +346,11 @@
+                                        True,
+                                        error)
+         if error.Fail():
+-            print error.GetCString()
++            print(error.GetCString())
+             continue
+         verify_types(target, options)
+ 
+ elif getattr(lldb, 'debugger', None):
+     lldb.debugger.HandleCommand(
+         'command script add -f types.check_padding_command check_padding')
+-    print '"check_padding" command installed, use the "--help" option for detailed help'
++    print('"check_padding" command installed, use the "--help" option for detailed help')
