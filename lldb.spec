@@ -8,10 +8,10 @@ Summary:	Next generation high-performance debugger
 License:	NCSA
 URL:		http://lldb.llvm.org/
 Source0:	http://%{?rc_ver:pre}releases.llvm.org/%{version}/%{?rc_ver:rc%{rc_ver}}/%{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src.tar.xz
-Patch0:		0001-Fix-test-deps.patch
 
 BuildRequires:	cmake
 BuildRequires:	llvm-devel = %{version}
+BuildRequires:	llvm-test = %{version}
 BuildRequires:	clang-devel = %{version}
 BuildRequires:	ncurses-devel
 BuildRequires:	swig
@@ -48,7 +48,6 @@ The package contains the LLDB Python module.
 
 %prep
 %setup -q -n %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
-%patch0 -p1 -b .test-dep
 
 # HACK so that lldb can find its custom readline.so, because we move it
 # after install.
@@ -85,9 +84,6 @@ CXXFLAGS="%{optflags} -Wno-error=format-security"
 	-DPYTHON_VERSION_MINOR:STRING=$(%{__python2} -c "import sys; print(sys.version_info.minor)") \
 	-DLLVM_EXTERNAL_LIT=%{_bindir}/lit \
 	-DLLVM_LIT_ARGS="-sv \
-	-DFileCheck=%{_libdir}/llvm/FileCheck \
-	-Dcount=%{_libdir}/llvm/count \
-	-Dnot=%{_libdir}/llvm/not \
 	--path %{_libdir}/llvm" \
 
 make %{?_smp_mflags}
@@ -125,9 +121,6 @@ rm -f %{buildroot}%{python2_sitearch}/six.*
 %changelog
 * Wed Mar 20 2019 sguelton@redhat.com - 8.0.0-1
 - 8.0.0 final
-
-* Mon Feb 11 2019 sguelton@redhat.com - 8.0.0-1.rc1
-- 8.0.0 Release candidate 1
 
 * Fri Feb 01 2019 Fedora Release Engineering <releng@fedoraproject.org> - 7.0.1-1.1
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
