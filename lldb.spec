@@ -2,7 +2,7 @@
 
 Name:		lldb
 Version:	8.0.0
-Release:	2%{?rc_ver:.rc%{rc_ver}}%{?dist}.1
+Release:	2%{?rc_ver:.rc%{rc_ver}}%{?dist}.2
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -122,6 +122,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Mon Aug 19 2019 Miro Hrončok <mhroncok@redhat.com> - 8.0.0-2.2
+- Rebuilt for Python 3.8
+
 * Thu Jul 25 2019 Fedora Release Engineering <releng@fedoraproject.org> - 8.0.0-2.1
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
 
