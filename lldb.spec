@@ -1,15 +1,14 @@
-#%%global rc_ver 4
+%global rc_ver 3
+%global baserelease 0.1
 
 Name:		lldb
-Version:	8.0.0
-Release:	2%{?rc_ver:.rc%{rc_ver}}%{?dist}.2
+Version:	9.0.0
+Release:	%{baserelease}%{?rc_ver:.rc%{rc_ver}}%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
 URL:		http://lldb.llvm.org/
 Source0:	http://%{?rc_ver:pre}releases.llvm.org/%{version}/%{?rc_ver:rc%{rc_ver}}/%{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src.tar.xz
-
-Patch1:		python3.patch
 
 BuildRequires:	cmake
 BuildRequires:	llvm-devel = %{version}
@@ -50,12 +49,6 @@ The package contains the LLDB Python module.
 
 %prep
 %setup -q -n %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
-
-%patch1 -p1 -b .python
-
-# HACK so that lldb can find its custom readline.so, because we move it
-# after install.
-sed -i -e "s~import sys~import sys\nsys.path.insert\(1, '%{python3_sitearch}/lldb'\)~g" source/Interpreter/embedded_interpreter.py
 
 %build
 
@@ -101,7 +94,6 @@ rm -fv %{buildroot}%{_libdir}/*.a
 # python: fix binary libraries location
 liblldb=$(basename $(readlink -e %{buildroot}%{_libdir}/liblldb.so))
 ln -vsf "../../../${liblldb}" %{buildroot}%{python3_sitearch}/lldb/_lldb.so
-mv -v %{buildroot}%{python3_sitearch}/readline.so %{buildroot}%{python3_sitearch}/lldb/readline.so
 %py_byte_compile %{__python3} %{buildroot}%{python3_sitearch}/lldb
 
 # remove bundled six.py
@@ -122,6 +114,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Thu Aug 22 2019 Tom Stellard <tstellar@redhat.com> - 9.0.0-0.1.rc3
+- 9.0.0-rc3 Release
+
 * Mon Aug 19 2019 Miro Hrončok <mhroncok@redhat.com> - 8.0.0-2.2
 - Rebuilt for Python 3.8
 
