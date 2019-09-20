@@ -1,5 +1,5 @@
-%global rc_ver 3
-%global baserelease 0.1
+#%%global rc_ver 3
+%global baserelease 1
 
 Name:		lldb
 Version:	9.0.0
@@ -114,6 +114,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Thu Sep 19 2019 Tom Stellard <tstellar@redhat.com> - 9.0.0-1
+- 9.0.0 Release
+
 * Thu Aug 22 2019 Tom Stellard <tstellar@redhat.com> - 9.0.0-0.1.rc3
 - 9.0.0-rc3 Release
 
