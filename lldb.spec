@@ -1,8 +1,8 @@
 #%%global rc_ver 3
-%global baserelease 1
+%global baserelease 2
 
 Name:		lldb
-Version:	9.0.0
+Version:	9.0.1
 Release:	%{baserelease}%{?rc_ver:.rc%{rc_ver}}%{?dist}
 Summary:	Next generation high-performance debugger
 
@@ -114,6 +114,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Sat Dec 21 2019 Tom Stellard <tstellar@redhat.com> - 9.0.1-2
+- 9.0.1 Release
+
 * Thu Sep 19 2019 Tom Stellard <tstellar@redhat.com> - 9.0.0-1
 - 9.0.0 Release
 
