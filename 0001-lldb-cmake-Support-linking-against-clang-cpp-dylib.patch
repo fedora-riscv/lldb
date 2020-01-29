@@ -1,0 +1,321 @@
+From 8f442727f2e8d6d426ae9cef42434ef538d1ed13 Mon Sep 17 00:00:00 2001
+From: Michal Gorny <mgorny@gentoo.org>
+Date: Fri, 4 Oct 2019 12:03:03 +0000
+Subject: [PATCH] [lldb] [cmake] Support linking against clang-cpp dylib
+
+Link against clang-cpp dylib rather than split libs when
+CLANG_LINK_CLANG_DYLIB is enabled.
+
+Differential Revision: https://reviews.llvm.org/D68456
+
+llvm-svn: 373734
+---
+ lldb/cmake/modules/AddLLDB.cmake                      | 15 +++++++++++++--
+ lldb/source/Core/CMakeLists.txt                       |  4 +++-
+ .../Plugins/ExpressionParser/Clang/CMakeLists.txt     | 19 ++++++++++---------
+ lldb/source/Plugins/Language/ObjC/CMakeLists.txt      |  3 ++-
+ .../ObjC/AppleObjCRuntime/CMakeLists.txt              |  3 ++-
+ .../RenderScript/RenderScriptRuntime/CMakeLists.txt   |  3 ++-
+ lldb/source/Plugins/Platform/MacOSX/CMakeLists.txt    |  3 ++-
+ lldb/source/Plugins/SymbolFile/DWARF/CMakeLists.txt   |  5 +++--
+ .../Plugins/SymbolFile/NativePDB/CMakeLists.txt       |  5 +++--
+ lldb/source/Plugins/SymbolFile/PDB/CMakeLists.txt     |  7 ++++---
+ lldb/source/Symbol/CMakeLists.txt                     |  8 +++++---
+ lldb/tools/lldb-instr/CMakeLists.txt                  |  2 +-
+ 12 files changed, 50 insertions(+), 27 deletions(-)
+
+diff --git a/lldb/cmake/modules/AddLLDB.cmake b/lldb/cmake/modules/AddLLDB.cmake
+index 4c99278..35a8097 100644
+--- a/lldb/cmake/modules/AddLLDB.cmake
++++ b/lldb/cmake/modules/AddLLDB.cmake
+@@ -37,7 +37,7 @@ function(add_lldb_library name)
+   cmake_parse_arguments(PARAM
+     "MODULE;SHARED;STATIC;OBJECT;PLUGIN"
+     "INSTALL_PREFIX;ENTITLEMENTS"
+-    "EXTRA_CXXFLAGS;DEPENDS;LINK_LIBS;LINK_COMPONENTS"
++    "EXTRA_CXXFLAGS;DEPENDS;LINK_LIBS;LINK_COMPONENTS;CLANG_LIBS"
+     ${ARGN})
+   llvm_process_sources(srcs ${PARAM_UNPARSED_ARGUMENTS})
+   list(APPEND LLVM_LINK_COMPONENTS ${PARAM_LINK_COMPONENTS})
+@@ -91,6 +91,12 @@ function(add_lldb_library name)
+       ${pass_ENTITLEMENTS}
+       ${pass_NO_INSTALL_RPATH}
+     )
++
++    if(CLANG_LINK_CLANG_DYLIB)
++      target_link_libraries(${name} PRIVATE clang-cpp)
++    else()
++      target_link_libraries(${name} PRIVATE ${PARAM_CLANG_LIBS})
++    endif()
+   endif()
+ 
+   if(PARAM_SHARED)
+@@ -132,7 +138,7 @@ function(add_lldb_executable name)
+   cmake_parse_arguments(ARG
+     "GENERATE_INSTALL"
+     "INSTALL_PREFIX;ENTITLEMENTS"
+-    "LINK_LIBS;LINK_COMPONENTS"
++    "LINK_LIBS;CLANG_LIBS;LINK_COMPONENTS"
+     ${ARGN}
+     )
+ 
+@@ -152,6 +158,11 @@ function(add_lldb_executable name)
+   )
+ 
+   target_link_libraries(${name} PRIVATE ${ARG_LINK_LIBS})
++  if(CLANG_LINK_CLANG_DYLIB)
++    target_link_libraries(${name} PRIVATE clang-cpp)
++  else()
++    target_link_libraries(${name} PRIVATE ${ARG_CLANG_LIBS})
++  endif()
+   set_target_properties(${name} PROPERTIES FOLDER "lldb executables")
+ 
+   if(ARG_GENERATE_INSTALL)
+diff --git a/lldb/source/Core/CMakeLists.txt b/lldb/source/Core/CMakeLists.txt
+index 7ca37f9..2e05fa3 100644
+--- a/lldb/source/Core/CMakeLists.txt
++++ b/lldb/source/Core/CMakeLists.txt
+@@ -58,7 +58,6 @@ add_lldb_library(lldbCore
+   ValueObjectVariable.cpp
+ 
+   LINK_LIBS
+-    clangAST
+     lldbBreakpoint
+     lldbDataFormatters
+     lldbExpression
+@@ -71,6 +70,9 @@ add_lldb_library(lldbCore
+     lldbPluginObjCLanguage
+     ${LLDB_CURSES_LIBS}
+ 
++  CLANG_LIBS
++    clangDriver
++
+   LINK_COMPONENTS
+     Support
+     Demangle
+diff --git a/lldb/source/Plugins/ExpressionParser/Clang/CMakeLists.txt b/lldb/source/Plugins/ExpressionParser/Clang/CMakeLists.txt
+index 950dae6..3fc1e0d 100644
+--- a/lldb/source/Plugins/ExpressionParser/Clang/CMakeLists.txt
++++ b/lldb/source/Plugins/ExpressionParser/Clang/CMakeLists.txt
+@@ -25,6 +25,16 @@ add_lldb_library(lldbPluginExpressionParserClang PLUGIN
+   ${tablegen_deps}
+ 
+   LINK_LIBS
++    lldbCore
++    lldbExpression
++    lldbHost
++    lldbInterpreter
++    lldbSymbol
++    lldbTarget
++    lldbUtility
++    lldbPluginCPlusPlusLanguage
++    lldbPluginCPPRuntime
++  CLANG_LIBS
+     clangAST
+     clangCodeGen
+     clangDriver
+@@ -36,15 +46,6 @@ add_lldb_library(lldbPluginExpressionParserClang PLUGIN
+     clangRewriteFrontend
+     clangSema
+     clangSerialization
+-    lldbCore
+-    lldbExpression
+-    lldbHost
+-    lldbInterpreter
+-    lldbSymbol
+-    lldbTarget
+-    lldbUtility
+-    lldbPluginCPlusPlusLanguage
+-    lldbPluginCPPRuntime
+   LINK_COMPONENTS
+     Core
+     ExecutionEngine
+diff --git a/lldb/source/Plugins/Language/ObjC/CMakeLists.txt b/lldb/source/Plugins/Language/ObjC/CMakeLists.txt
+index afb68d4..ebb96c2 100644
+--- a/lldb/source/Plugins/Language/ObjC/CMakeLists.txt
++++ b/lldb/source/Plugins/Language/ObjC/CMakeLists.txt
+@@ -22,7 +22,6 @@ add_lldb_library(lldbPluginObjCLanguage PLUGIN
+   NSString.cpp
+ 
+   LINK_LIBS
+-    clangAST
+     lldbCore
+     lldbDataFormatters
+     lldbExpression
+@@ -32,6 +31,8 @@ add_lldb_library(lldbPluginObjCLanguage PLUGIN
+     lldbUtility
+     lldbPluginAppleObjCRuntime
+     lldbPluginClangCommon
++  CLANG_LIBS
++    clangAST
+ 
+   EXTRA_CXXFLAGS ${EXTRA_CXXFLAGS}
+ )
+diff --git a/lldb/source/Plugins/LanguageRuntime/ObjC/AppleObjCRuntime/CMakeLists.txt b/lldb/source/Plugins/LanguageRuntime/ObjC/AppleObjCRuntime/CMakeLists.txt
+index 29d9ba1..bcf3240 100644
+--- a/lldb/source/Plugins/LanguageRuntime/ObjC/AppleObjCRuntime/CMakeLists.txt
++++ b/lldb/source/Plugins/LanguageRuntime/ObjC/AppleObjCRuntime/CMakeLists.txt
+@@ -9,7 +9,6 @@ add_lldb_library(lldbPluginAppleObjCRuntime PLUGIN
+   AppleObjCTypeEncodingParser.cpp
+ 
+   LINK_LIBS
+-    clangAST
+     lldbBreakpoint
+     lldbCore
+     lldbExpression
+@@ -20,6 +19,8 @@ add_lldb_library(lldbPluginAppleObjCRuntime PLUGIN
+     lldbUtility
+     lldbPluginExpressionParserClang
+     lldbPluginCPPRuntime
++  CLANG_LIBS
++    clangAST
+   LINK_COMPONENTS
+     Support
+   )
+diff --git a/lldb/source/Plugins/LanguageRuntime/RenderScript/RenderScriptRuntime/CMakeLists.txt b/lldb/source/Plugins/LanguageRuntime/RenderScript/RenderScriptRuntime/CMakeLists.txt
+index 1a6c499..c122e09 100644
+--- a/lldb/source/Plugins/LanguageRuntime/RenderScript/RenderScriptRuntime/CMakeLists.txt
++++ b/lldb/source/Plugins/LanguageRuntime/RenderScript/RenderScriptRuntime/CMakeLists.txt
+@@ -13,7 +13,6 @@ add_lldb_library(lldbPluginRenderScriptRuntime PLUGIN
+   ${tablegen_deps}
+ 
+   LINK_LIBS
+-    clangBasic
+     lldbBreakpoint
+     lldbCore
+     lldbDataFormatters
+@@ -22,6 +21,8 @@ add_lldb_library(lldbPluginRenderScriptRuntime PLUGIN
+     lldbInterpreter
+     lldbSymbol
+     lldbTarget
++  CLANG_LIBS
++    clangBasic
+   LINK_COMPONENTS
+     Core
+     IRReader
+diff --git a/lldb/source/Plugins/Platform/MacOSX/CMakeLists.txt b/lldb/source/Plugins/Platform/MacOSX/CMakeLists.txt
+index 6f0d952..dc04693 100644
+--- a/lldb/source/Plugins/Platform/MacOSX/CMakeLists.txt
++++ b/lldb/source/Plugins/Platform/MacOSX/CMakeLists.txt
+@@ -31,7 +31,6 @@ add_lldb_library(lldbPluginPlatformMacOSX PLUGIN
+   ${PLUGIN_PLATFORM_MACOSX_SOURCES}
+   
+   LINK_LIBS
+-    clangBasic
+     lldbBreakpoint
+     lldbCore
+     lldbHost
+@@ -41,6 +40,8 @@ add_lldb_library(lldbPluginPlatformMacOSX PLUGIN
+     lldbUtility
+     lldbPluginPlatformPOSIX
+     ${OBJC_LIBS}
++  CLANG_LIBS
++    clangBasic
+   LINK_COMPONENTS
+     Support
+     )
+diff --git a/lldb/source/Plugins/SymbolFile/DWARF/CMakeLists.txt b/lldb/source/Plugins/SymbolFile/DWARF/CMakeLists.txt
+index cd588cb..69d2d21 100644
+--- a/lldb/source/Plugins/SymbolFile/DWARF/CMakeLists.txt
++++ b/lldb/source/Plugins/SymbolFile/DWARF/CMakeLists.txt
+@@ -36,8 +36,6 @@ add_lldb_library(lldbPluginSymbolFileDWARF PLUGIN
+   UniqueDWARFASTType.cpp
+ 
+   LINK_LIBS
+-    clangAST
+-    clangBasic
+     lldbCore
+     lldbExpression
+     lldbHost
+@@ -48,6 +46,9 @@ add_lldb_library(lldbPluginSymbolFileDWARF PLUGIN
+     lldbPluginObjCLanguage
+     lldbPluginCPlusPlusLanguage
+     lldbPluginExpressionParserClang
++  CLANG_LIBS
++    clangAST
++    clangBasic
+   LINK_COMPONENTS
+     DebugInfoDWARF
+     Support
+diff --git a/lldb/source/Plugins/SymbolFile/NativePDB/CMakeLists.txt b/lldb/source/Plugins/SymbolFile/NativePDB/CMakeLists.txt
+index 52b431d..aaecec4 100644
+--- a/lldb/source/Plugins/SymbolFile/NativePDB/CMakeLists.txt
++++ b/lldb/source/Plugins/SymbolFile/NativePDB/CMakeLists.txt
+@@ -11,11 +11,12 @@ add_lldb_library(lldbPluginSymbolFileNativePDB PLUGIN
+   UdtRecordCompleter.cpp
+ 
+   LINK_LIBS
+-    clangAST
+-    clangLex
+     lldbCore
+     lldbSymbol
+     lldbUtility
++  CLANG_LIBS
++    clangAST
++    clangLex
+   LINK_COMPONENTS
+     DebugInfoCodeView
+     DebugInfoPDB
+diff --git a/lldb/source/Plugins/SymbolFile/PDB/CMakeLists.txt b/lldb/source/Plugins/SymbolFile/PDB/CMakeLists.txt
+index 64168d0..79bdce42 100644
+--- a/lldb/source/Plugins/SymbolFile/PDB/CMakeLists.txt
++++ b/lldb/source/Plugins/SymbolFile/PDB/CMakeLists.txt
+@@ -4,12 +4,13 @@ add_lldb_library(lldbPluginSymbolFilePDB PLUGIN
+   SymbolFilePDB.cpp
+ 
+   LINK_LIBS
+-    clangAST
+-    clangLex
+     lldbCore
++    lldbPluginSymbolFileNativePDB
+     lldbSymbol
+     lldbUtility
+-  lldbPluginSymbolFileNativePDB
++  CLANG_LIBS
++    clangAST
++    clangLex
+   LINK_COMPONENTS
+     DebugInfoPDB
+     Support
+diff --git a/lldb/source/Symbol/CMakeLists.txt b/lldb/source/Symbol/CMakeLists.txt
+index 4b922c2..8614172 100644
+--- a/lldb/source/Symbol/CMakeLists.txt
++++ b/lldb/source/Symbol/CMakeLists.txt
+@@ -47,9 +47,6 @@ add_lldb_library(lldbSymbol
+   ${PLATFORM_SOURCES}
+ 
+   LINK_LIBS
+-    clangAST
+-    clangBasic
+-    clangFrontend
+     lldbCore
+     lldbExpression
+     lldbHost
+@@ -61,6 +58,11 @@ add_lldb_library(lldbSymbol
+     lldbPluginObjCLanguage
+     lldbPluginObjCRuntime
+ 
++  CLANG_LIBS
++    clangAST
++    clangBasic
++    clangFrontend
++
+   LINK_COMPONENTS
+     Support
+   )
+diff --git a/lldb/tools/lldb-instr/CMakeLists.txt b/lldb/tools/lldb-instr/CMakeLists.txt
+index e3dbeba..8da453b 100644
+--- a/lldb/tools/lldb-instr/CMakeLists.txt
++++ b/lldb/tools/lldb-instr/CMakeLists.txt
+@@ -1,7 +1,7 @@
+ add_lldb_tool(lldb-instr
+   Instrument.cpp
+ 
+-  LINK_LIBS
++  CLANG_LIBS
+     clangAST
+     clangBasic
+     clangCodeGen
+-- 
+1.8.3.1
+

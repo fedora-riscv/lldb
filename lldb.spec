@@ -1,5 +1,5 @@
 #%%global rc_ver 3
-%global baserelease 3
+%global baserelease 4
 
 Name:		lldb
 Version:	9.0.1
@@ -9,6 +9,8 @@ Summary:	Next generation high-performance debugger
 License:	NCSA
 URL:		http://lldb.llvm.org/
 Source0:	http://%{?rc_ver:pre}releases.llvm.org/%{version}/%{?rc_ver:rc%{rc_ver}}/%{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src.tar.xz
+
+Patch0:		0001-lldb-cmake-Support-linking-against-clang-cpp-dylib.patch
 
 BuildRequires:	cmake
 BuildRequires:	llvm-devel = %{version}
@@ -48,7 +50,7 @@ Requires:	python3-six
 The package contains the LLDB Python module.
 
 %prep
-%setup -q -n %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
+%autosetup -n %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src -p2
 
 %build
 
@@ -79,6 +81,7 @@ CXXFLAGS="%{optflags} -Wno-error=format-security"
 	-DPYTHON_VERSION_MAJOR:STRING=$(%{__python3} -c "import sys; print(sys.version_info.major)") \
 	-DPYTHON_VERSION_MINOR:STRING=$(%{__python3} -c "import sys; print(sys.version_info.minor)") \
 	-DLLVM_EXTERNAL_LIT=%{_bindir}/lit \
+	-DCLANG_LINK_CLANG_DYLIB=ON \
 	-DLLVM_LIT_ARGS="-sv \
 	--path %{_libdir}/llvm" \
 
@@ -114,6 +117,10 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Wed Jan 29 2020 Tom Stellard <tstellar@redhat.com> - 9.0.1-4
+- Link against libclang-cpp.so
+- https://fedoraproject.org/wiki/Changes/Stop-Shipping-Individual-Component-Libraries-In-clang-lib-Package
+
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 9.0.1-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
 
