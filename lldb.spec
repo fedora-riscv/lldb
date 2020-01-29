@@ -1,5 +1,5 @@
 #%%global rc_ver 3
-%global baserelease 2
+%global baserelease 3
 
 Name:		lldb
 Version:	9.0.1
@@ -114,6 +114,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 9.0.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
+
 * Sat Dec 21 2019 Tom Stellard <tstellar@redhat.com> - 9.0.1-2
 - 9.0.1 Release
 
