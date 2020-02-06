@@ -1,16 +1,17 @@
-#%%global rc_ver 3
-%global baserelease 4
+%global rc_ver 1
+%global baserelease 0.1
+%global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
-Version:	9.0.1
+Version:	10.0.0
 Release:	%{baserelease}%{?rc_ver:.rc%{rc_ver}}%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
 URL:		http://lldb.llvm.org/
-Source0:	http://%{?rc_ver:pre}releases.llvm.org/%{version}/%{?rc_ver:rc%{rc_ver}}/%{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src.tar.xz
-
-Patch0:		0001-lldb-cmake-Support-linking-against-clang-cpp-dylib.patch
+Source0:	http://%{?rc_ver:pre}releases.llvm.org/%{version}/%{?rc_ver:rc%{rc_ver}}/%{lldb_srcdir}.tar.xz
+Source1:	https://%{?rc_ver:pre}releases.llvm.org/%{version}/%{?rc_ver:rc%{rc_ver}}/%{lldb_srcdir}.tar.xz.sig
+Source2:	https://prereleases.llvm.org/%{version}/hans-gpg-key.asc
 
 BuildRequires:	cmake
 BuildRequires:	llvm-devel = %{version}
@@ -117,6 +118,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Fri Jan 31 2020 sguelton@redhat.com - 10.0.0-0.1.rc1
+- 10.0.0 rc1
+
 * Wed Jan 29 2020 Tom Stellard <tstellar@redhat.com> - 9.0.1-4
 - Link against libclang-cpp.so
 - https://fedoraproject.org/wiki/Changes/Stop-Shipping-Individual-Component-Libraries-In-clang-lib-Package
