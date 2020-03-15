@@ -1,5 +1,5 @@
-%global rc_ver 3
-%global baserelease 0.3
+%global rc_ver 4
+%global baserelease 0.4
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
@@ -118,6 +118,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Sun Mar 15 2020 sguelton@redhat.com - 10.0.0-0.4.rc4
+- 10.0.0 rc4
+
 * Thu Mar 05 2020 sguelton@redhat.com - 10.0.0-0.3.rc3
 - 10.0.0 rc3
 
