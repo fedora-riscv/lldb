@@ -1,5 +1,5 @@
-%global rc_ver 6
-%global baserelease 0.6
+#%%global rc_ver 6
+%global baserelease 1
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
@@ -9,8 +9,13 @@ Summary:	Next generation high-performance debugger
 
 License:	NCSA
 URL:		http://lldb.llvm.org/
-Source0:	http://%{?rc_ver:pre}releases.llvm.org/%{version}/%{?rc_ver:rc%{rc_ver}}/%{lldb_srcdir}.tar.xz
-Source1:	https://%{?rc_ver:pre}releases.llvm.org/%{version}/%{?rc_ver:rc%{rc_ver}}/%{lldb_srcdir}.tar.xz.sig
+%if 0%{?rc_ver:1}
+Source0:	https://prereleases.llvm.org/%{version}/rc%{rc_ver}/%{lldb_srcdir}.tar.xz
+Source1:	https://prereleases.llvm.org/%{version}/rc%{rc_ver}/%{lldb_srcdir}.tar.xz.sig
+%else
+Source0:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{version}/%{lldb_srcdir}.tar.xz
+Source3:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{version}/%{lldb_srcdir}.tar.xz.sig
+%endif
 Source2:	https://prereleases.llvm.org/%{version}/hans-gpg-key.asc
 
 BuildRequires:	cmake
@@ -51,7 +56,7 @@ Requires:	python3-six
 The package contains the LLDB Python module.
 
 %prep
-%autosetup -n %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src -p2
+%autosetup -n %{lldb_srcdir} -p2
 
 %build
 
@@ -118,6 +123,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Mon Mar 30 2020 sguelton@redhat.com - 10.0.0-1
+- 10.0.0 final
+
 * Wed Mar 25 2020 sguelton@redhat.com - 10.0.0-0.6.rc6
 - 10.0.0 rc6
 
