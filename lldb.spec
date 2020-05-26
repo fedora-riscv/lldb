@@ -1,5 +1,5 @@
 #%%global rc_ver 6
-%global baserelease 1
+%global baserelease 2
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
@@ -123,6 +123,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Tue May 26 2020 Miro Hrončok <mhroncok@redhat.com> - 10.0.0-2
+- Rebuilt for Python 3.9
+
 * Mon Mar 30 2020 sguelton@redhat.com - 10.0.0-1
 - 10.0.0 final
 
