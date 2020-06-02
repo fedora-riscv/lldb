@@ -1,5 +1,5 @@
 #%%global rc_ver 6
-%global baserelease 2
+%global baserelease 3
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
@@ -71,6 +71,7 @@ CXXFLAGS="%{optflags} -Wno-error=format-security"
 
 %cmake .. \
 	-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+	-DCMAKE_SKIP_RPATH:BOOL=ON \
 	-DLLVM_LINK_LLVM_DYLIB:BOOL=ON \
 	-DLLVM_CONFIG:FILEPATH=/usr/bin/llvm-config-%{__isa_bits} \
 	\
@@ -123,6 +124,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Tue Jun 02 2020 sguelton@redhat.com - 10.0.0-3
+- Instruct cmake not to generate RPATH
+
 * Tue May 26 2020 Miro Hrončok <mhroncok@redhat.com> - 10.0.0-2
 - Rebuilt for Python 3.9
 
