@@ -1,5 +1,5 @@
 #%%global rc_ver 6
-%global baserelease 3
+%global baserelease 4
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
@@ -30,6 +30,7 @@ BuildRequires:	zlib-devel
 BuildRequires:	libxml2-devel
 BuildRequires:	libedit-devel
 BuildRequires:	python3-lit
+BuildRequires:	multilib-rpm-config
 
 Requires:	python3-lldb
 
@@ -98,6 +99,8 @@ make %{?_smp_mflags}
 cd _build
 make install DESTDIR=%{buildroot}
 
+%multilib_fix_c_header --file %{_includedir}/lldb/Host/Config.h
+
 # remove static libraries
 rm -fv %{buildroot}%{_libdir}/*.a
 
@@ -124,6 +127,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Tue Jun 02 2020 sguelton@redhat.com - 10.0.0-4
+- Fix arch-dependent header
+
 * Tue Jun 02 2020 sguelton@redhat.com - 10.0.0-3
 - Instruct cmake not to generate RPATH
 
