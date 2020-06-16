@@ -1,5 +1,5 @@
 #%%global rc_ver 6
-%global baserelease 4
+%global baserelease 5
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
@@ -52,6 +52,7 @@ The package contains header files for the LLDB debugger.
 Summary:	Python module for LLDB
 BuildRequires:	python3-devel
 Requires:	python3-six
+Requires:	%{name}%{?_isa} = %{version}-%{release}
 
 %description -n python3-lldb
 The package contains the LLDB Python module.
@@ -127,6 +128,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Tue Jun 16 2020 sguelton@redhat.com - 10.0.0-5
+- Finer grain specification of python3-lldb deps
+
 * Tue Jun 02 2020 sguelton@redhat.com - 10.0.0-4
 - Fix arch-dependent header
 
