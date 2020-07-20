@@ -1,5 +1,5 @@
 #%%global rc_ver 6
-%global baserelease 5
+%global baserelease 6
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
@@ -14,7 +14,7 @@ Source0:	https://prereleases.llvm.org/%{version}/rc%{rc_ver}/%{lldb_srcdir}.tar.
 Source1:	https://prereleases.llvm.org/%{version}/rc%{rc_ver}/%{lldb_srcdir}.tar.xz.sig
 %else
 Source0:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{version}/%{lldb_srcdir}.tar.xz
-Source3:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{version}/%{lldb_srcdir}.tar.xz.sig
+Source1:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{version}/%{lldb_srcdir}.tar.xz.sig
 %endif
 Source2:	https://prereleases.llvm.org/%{version}/hans-gpg-key.asc
 
@@ -31,8 +31,12 @@ BuildRequires:	libxml2-devel
 BuildRequires:	libedit-devel
 BuildRequires:	python3-lit
 BuildRequires:	multilib-rpm-config
+BuildRequires:	ninja-build
 
 Requires:	python3-lldb
+
+# For origin certification
+BuildRequires:	gnupg2
 
 %description
 LLDB is a next generation, high-performance debugger. It is built as a set
@@ -58,20 +62,15 @@ Requires:	%{name}%{?_isa} = %{version}-%{release}
 The package contains the LLDB Python module.
 
 %prep
+%{gpgverify} --keyring='%{SOURCE2}' --signature='%{SOURCE1}' --data='%{SOURCE0}'
 %autosetup -n %{lldb_srcdir} -p2
 
 %build
 
-mkdir -p _build
-cd _build
-
-# Python version detection is broken
-LDFLAGS="%{__global_ldflags} -lpthread -ldl"
-
 CFLAGS="%{optflags} -Wno-error=format-security"
 CXXFLAGS="%{optflags} -Wno-error=format-security"
 
-%cmake .. \
+%cmake  -GNinja \
 	-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 	-DCMAKE_SKIP_RPATH:BOOL=ON \
 	-DLLVM_LINK_LLVM_DYLIB:BOOL=ON \
@@ -94,11 +93,10 @@ CXXFLAGS="%{optflags} -Wno-error=format-security"
 	-DLLVM_LIT_ARGS="-sv \
 	--path %{_libdir}/llvm" \
 
-make %{?_smp_mflags}
+%cmake_build
 
 %install
-cd _build
-make install DESTDIR=%{buildroot}
+%cmake_install
 
 %multilib_fix_c_header --file %{_includedir}/lldb/Host/Config.h
 
@@ -115,6 +113,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 
 %ldconfig_scriptlets
 
+%check
+
+
 %files
 %{_bindir}/lldb*
 %{_libdir}/liblldb.so.*
@@ -128,6 +129,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Fri Jul 17 2020 sguelton@redhat.com - 10.0.0-6
+- Use ninja and according macros as build system
+
 * Tue Jun 16 2020 sguelton@redhat.com - 10.0.0-5
 - Finer grain specification of python3-lldb deps
 
