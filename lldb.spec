@@ -1,5 +1,5 @@
 #%%global rc_ver 6
-%global baserelease 7
+%global baserelease 8
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
@@ -18,7 +18,10 @@ Source1:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{versio
 %endif
 Source2:	https://prereleases.llvm.org/%{version}/hans-gpg-key.asc
 
+BuildRequires:	gcc
+BuildRequires:	gcc-c++
 BuildRequires:	cmake
+BuildRequires:	ninja-build
 BuildRequires:	llvm-devel = %{version}
 BuildRequires:	llvm-test = %{version}
 BuildRequires:	clang-devel = %{version}
@@ -31,7 +34,6 @@ BuildRequires:	libxml2-devel
 BuildRequires:	libedit-devel
 BuildRequires:	python3-lit
 BuildRequires:	multilib-rpm-config
-BuildRequires:	ninja-build
 
 Requires:	python3-lldb
 
@@ -117,6 +119,7 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 
 
 %files
+%license LICENSE.TXT
 %{_bindir}/lldb*
 %{_libdir}/liblldb.so.*
 %{_libdir}/liblldbIntelFeatures.so.*
@@ -129,6 +132,10 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Wed Jul 29 2020 sguelton@redhat.com - 10.0.0-8
+- Make gcc dependency explicit, see https://fedoraproject.org/wiki/Packaging:C_and_C%2B%2B#BuildRequires_and_Requires
+- use %%license macro
+
 * Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 10.0.0-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
