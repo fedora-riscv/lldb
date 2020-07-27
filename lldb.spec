@@ -3,7 +3,7 @@
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
-Version:	10.0.0
+Version:	10.0.1
 Release:	%{baserelease}%{?rc_ver:.rc%{rc_ver}}%{?dist}
 Summary:	Next generation high-performance debugger
 
@@ -123,6 +123,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Mon Jul 27 2020 sguelton@redhat.com - 10.0.1-1
+- 10.0.1
+
 * Fri Apr 3 2020 sguelton@redhat.com - 10.0.0-1
 - 10.0.0 final
 
