@@ -1,5 +1,5 @@
 #%%global rc_ver 6
-%global baserelease 6
+%global baserelease 7
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
@@ -129,6 +129,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 10.0.0-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
 * Fri Jul 17 2020 sguelton@redhat.com - 10.0.0-6
 - Use ninja and according macros as build system
 
