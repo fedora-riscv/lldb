@@ -1,4 +1,4 @@
-%global rc_ver 1
+%global rc_ver 2
 %global baserelease 0.1
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
@@ -9,13 +9,8 @@ Summary:	Next generation high-performance debugger
 
 License:	NCSA
 URL:		http://lldb.llvm.org/
-%if 0%{?rc_ver:1}
-Source0:	https://prereleases.llvm.org/%{version}/rc%{rc_ver}/%{lldb_srcdir}.tar.xz
-Source1:	https://prereleases.llvm.org/%{version}/rc%{rc_ver}/%{lldb_srcdir}.tar.xz.sig
-%else
-Source0:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{version}/%{lldb_srcdir}.tar.xz
-Source1:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{version}/%{lldb_srcdir}.tar.xz.sig
-%endif
+Source0:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{version}%{?rc_ver:-rc%{rc_ver}}/%{lldb_srcdir}.tar.xz
+Source1:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{version}%{?rc_ver:-rc%{rc_ver}}/%{lldb_srcdir}.tar.xz.sig
 Source2:	https://prereleases.llvm.org/%{version}/hans-gpg-key.asc
 
 BuildRequires:	gcc
@@ -132,6 +127,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Tue Sep 01 2020 sguelton@redhat.com - 11.0.0-0.1.rc2
+- 11.0.0-rc2 Release
+
 * Mon Aug 10 2020 Tom Stellard <tstellar@redhat.com> - 11.0.0-0.1.rc1
 - 11.0.0-rc1 Release
 
