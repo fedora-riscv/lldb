@@ -1,4 +1,4 @@
-%global rc_ver 2
+%global rc_ver 3
 %global baserelease 0.1
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
@@ -127,6 +127,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Thu Sep 24 2020 sguelton@redhat.com - 11.0.0-0.1.rc3
+- 11.0.0-rc3 Release
+
 * Tue Sep 01 2020 sguelton@redhat.com - 11.0.0-0.1.rc2
 - 11.0.0-rc2 Release
 
