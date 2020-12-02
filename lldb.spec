@@ -1,9 +1,9 @@
-#%%global rc_ver 6
+%global rc_ver 1
 %global baserelease 1
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
-Version:	11.0.0
+Version:	11.0.1
 Release:	%{baserelease}%{?rc_ver:.rc%{rc_ver}}%{?dist}
 Summary:	Next generation high-performance debugger
 
@@ -11,7 +11,7 @@ License:	NCSA
 URL:		http://lldb.llvm.org/
 Source0:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{version}%{?rc_ver:-rc%{rc_ver}}/%{lldb_srcdir}.tar.xz
 Source1:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{version}%{?rc_ver:-rc%{rc_ver}}/%{lldb_srcdir}.tar.xz.sig
-Source2:	https://prereleases.llvm.org/%{version}/hans-gpg-key.asc
+Source2:	tstellar-gpg-key.asc
 
 BuildRequires:	gcc
 BuildRequires:	gcc-c++
@@ -127,6 +127,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Tue Dec 01 2020 sguelton@redhat.com - 11.0.1-1.rc1
+- llvm 11.0.1-rc1
+
 * Thu Oct 15 2020 sguelton@redhat.com - 11.0.0-1
 - Fix NVR
 
