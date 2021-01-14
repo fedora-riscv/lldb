@@ -1,9 +1,9 @@
-#%%global rc_ver 2
-%global baserelease 3
+%global rc_ver 1
+%global baserelease 1
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
-Version:	11.0.1
+Version:	11.1.0
 Release:	%{baserelease}%{?rc_ver:.rc%{rc_ver}}%{?dist}
 Summary:	Next generation high-performance debugger
 
@@ -127,6 +127,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Thu Jan 14 2021 Serge Guelton - 11.1.0-0.1.rc1
+- 11.1.0-rc1 release
+
 * Wed Jan 06 2021 Serge Guelton - 11.0.1-3
 - LLVM 11.0.1 final
 
