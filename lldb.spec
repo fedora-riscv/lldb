@@ -1,9 +1,9 @@
-%global rc_ver 2
-%global baserelease 3
+%global rc_ver 1
+%global baserelease 1
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
-Version:	11.1.0
+Version:	12.0.0
 Release:	%{baserelease}%{?rc_ver:.rc%{rc_ver}}%{?dist}
 Summary:	Next generation high-performance debugger
 
@@ -35,6 +35,8 @@ Requires:	python3-lldb
 # For origin certification
 BuildRequires:	gnupg2
 
+Patch0:     asm-ptrace.patch
+
 %description
 LLDB is a next generation, high-performance debugger. It is built as a set
 of reusable components which highly leverage existing libraries in the
@@ -60,7 +62,7 @@ The package contains the LLDB Python module.
 
 %prep
 %{gpgverify} --keyring='%{SOURCE2}' --signature='%{SOURCE1}' --data='%{SOURCE0}'
-%autosetup -n %{lldb_srcdir} -p2
+%autosetup -n %{lldb_srcdir} -p1
 
 %build
 
@@ -127,6 +129,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Wed Feb 17 2021 sguelton@redhat.com - 12.0.0-0.1.rc1
+- 12.0.0-rc1 release
+
 * Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 11.1.0-3.rc2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
