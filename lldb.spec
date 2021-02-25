@@ -35,8 +35,8 @@ Requires:	python3-lldb
 # For origin certification
 BuildRequires:	gnupg2
 
-Patch0:     asm-ptrace.patch
-Patch1:     D97721.diff
+Patch0:     0001-PATCH-lldb-Portable-asm-ptrace.h-include.patch
+Patch1:     0002-PATCH-lldb-Support-DWARF-5-DW_FORM_line_strp-used-by.patch
 
 %description
 LLDB is a next generation, high-performance debugger. It is built as a set
@@ -63,7 +63,7 @@ The package contains the LLDB Python module.
 
 %prep
 %{gpgverify} --keyring='%{SOURCE2}' --signature='%{SOURCE1}' --data='%{SOURCE0}'
-%autosetup -n %{lldb_srcdir} -p1
+%autosetup -n %{lldb_srcdir} -p2
 
 %build
 
