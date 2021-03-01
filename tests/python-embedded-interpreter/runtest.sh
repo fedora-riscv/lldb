@@ -2,7 +2,7 @@
 
 set -ex
 
-g++ -g test.cpp
+g++ -gdwarf-4 -g test.cpp
 
 test `lldb -b -o 'breakpoint set --file test.cpp --line 7' -o run -o 'p v' -- a.out \
   | grep \
