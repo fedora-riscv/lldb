@@ -1,5 +1,5 @@
 %global rc_ver 2
-%global baserelease 3
+%global baserelease 4
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
@@ -130,6 +130,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Tue Mar 02 2021 sguelton@redhat.com - 12.0.0-4.rc2
+- Apply upstream D97721
+
 * Mon Mar 01 2021 sguelton@redhat.com - 12.0.0-3.rc2
 - Update CI test
 
