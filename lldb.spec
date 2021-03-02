@@ -36,6 +36,7 @@ Requires:	python3-lldb
 BuildRequires:	gnupg2
 
 Patch0:     asm-ptrace.patch
+Patch1:     D97721.diff
 
 %description
 LLDB is a next generation, high-performance debugger. It is built as a set
