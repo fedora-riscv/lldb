@@ -1,5 +1,5 @@
-%global rc_ver 2
-%global baserelease 7
+%global rc_ver 3
+%global baserelease 8
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
@@ -130,6 +130,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Thu Mar 11 2021 sguelton@redhat.com - 12.0.0-8.rc3
+- LLVM 12.0.0 rc3
+
 * Thu Mar 11 2021 sguelton@redhat.com - 12.0.0-7.rc2
 - rebuilt
 
