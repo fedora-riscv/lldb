@@ -1,5 +1,5 @@
-%global rc_ver 4
-%global baserelease 10
+%global rc_ver 5
+%global baserelease 11
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
@@ -130,6 +130,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Thu Apr 08 2021 sguelton@redhat.com - 12.0.0-11.rc5
+- New upstream release candidate
+
 * Fri Apr 02 2021 sguelton@redhat.com - 12.0.0-10.rc4
 - New upstream release candidate
 
