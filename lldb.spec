@@ -1,10 +1,9 @@
-%global rc_ver 5
-%global baserelease 11
+#%%global rc_ver 5
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
-Version:	12.0.0
-Release:	%{baserelease}%{?rc_ver:.rc%{rc_ver}}%{?dist}
+Version:	12.0.0%{?rc_ver:~rc%{rc_ver}}
+Release:	1%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -130,6 +129,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Fri Apr 16 2021 Tom Stellard <tstellar@redhat.com> - 12.0.0-1
+- 12.0.0 Release
+
 * Thu Apr 08 2021 sguelton@redhat.com - 12.0.0-11.rc5
 - New upstream release candidate
 
