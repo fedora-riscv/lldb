@@ -54,6 +54,7 @@ The package contains header files for the LLDB debugger.
 %{?python_provide:%python_provide python3-lldb}
 Summary:	Python module for LLDB
 BuildRequires:	python3-devel
+BuildRequires:	python3-setuptools
 Requires:	python3-six
 Requires:	%{name}%{?_isa} = %{version}-%{release}
 
