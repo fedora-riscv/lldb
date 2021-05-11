@@ -1,10 +1,9 @@
-%global rc_ver 1
-%global baserelease 2
+#%%global rc_ver 5
 %global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
-Version:	12.0.0
-Release:	%{baserelease}%{?rc_ver:.rc%{rc_ver}}%{?dist}
+Version:	12.0.0%{?rc_ver:~rc%{rc_ver}}
+Release:	1%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -35,7 +34,8 @@ Requires:	python3-lldb
 # For origin certification
 BuildRequires:	gnupg2
 
-Patch0:     asm-ptrace.patch
+Patch0:     0001-PATCH-lldb-Portable-asm-ptrace.h-include.patch
+Patch1:     0002-PATCH-lldb-Support-DWARF-5-DW_FORM_line_strp-used-by.patch
 
 %description
 LLDB is a next generation, high-performance debugger. It is built as a set
@@ -54,6 +54,7 @@ The package contains header files for the LLDB debugger.
 %{?python_provide:%python_provide python3-lldb}
 Summary:	Python module for LLDB
 BuildRequires:	python3-devel
+BuildRequires:	python3-setuptools
 Requires:	python3-six
 Requires:	%{name}%{?_isa} = %{version}-%{release}
 
@@ -62,7 +63,7 @@ The package contains the LLDB Python module.
 
 %prep
 %{gpgverify} --keyring='%{SOURCE2}' --signature='%{SOURCE1}' --data='%{SOURCE0}'
-%autosetup -n %{lldb_srcdir} -p1
+%autosetup -n %{lldb_srcdir} -p2
 
 %build
 
@@ -129,8 +130,38 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
-* Tue Mar 30 2021 Jonathan Wakely <jwakely@redhat.com> - 12.0.0-2.rc1
-- Rebuilt for removed libstdc++ symbol (#1937698)
+* Fri Apr 16 2021 Tom Stellard <tstellar@redhat.com> - 12.0.0-1
+- 12.0.0 Release
+
+* Thu Apr 08 2021 sguelton@redhat.com - 12.0.0-11.rc5
+- New upstream release candidate
+
+* Fri Apr 02 2021 sguelton@redhat.com - 12.0.0-10.rc4
+- New upstream release candidate
+
+* Wed Mar 31 2021 Jonathan Wakely <jwakely@redhat.com> - 12.0.0-9.rc3
+- Rebuilt for removed libstdc++ symbols (#1937698)
+
+* Thu Mar 11 2021 sguelton@redhat.com - 12.0.0-8.rc3
+- LLVM 12.0.0 rc3
+
+* Thu Mar 11 2021 sguelton@redhat.com - 12.0.0-7.rc2
+- rebuilt
+
+* Tue Mar 02 2021 sguelton@redhat.com - 12.0.0-6.rc2
+- Update test regexp
+
+* Tue Mar 02 2021 sguelton@redhat.com - 12.0.0-5.rc2
+- Improve CI debugging
+
+* Tue Mar 02 2021 sguelton@redhat.com - 12.0.0-4.rc2
+- Apply upstream D97721
+
+* Mon Mar 01 2021 sguelton@redhat.com - 12.0.0-3.rc2
+- Update CI test
+
+* Thu Feb 25 2021 sguelton@redhat.com - 12.0.0-0.2.rc2
+- 12.0.0-rc2 release
 
 * Wed Feb 17 2021 sguelton@redhat.com - 12.0.0-0.1.rc1
 - 12.0.0-rc1 release
