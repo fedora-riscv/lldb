@@ -1,15 +1,16 @@
-#%%global rc_ver 5
-%global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
+%global rc_ver 1
+%global lldb_version 12.0.1
+%global lldb_srcdir %{name}-%{lldb_version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
-Version:	12.0.0%{?rc_ver:~rc%{rc_ver}}
+Version:	%{lldb_version}%{?rc_ver:~rc%{rc_ver}}
 Release:	1%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
 URL:		http://lldb.llvm.org/
-Source0:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{version}%{?rc_ver:-rc%{rc_ver}}/%{lldb_srcdir}.tar.xz
-Source1:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{version}%{?rc_ver:-rc%{rc_ver}}/%{lldb_srcdir}.tar.xz.sig
+Source0:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{lldb_version}%{?rc_ver:-rc%{rc_ver}}/%{lldb_srcdir}.tar.xz
+Source1:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{lldb_version}%{?rc_ver:-rc%{rc_ver}}/%{lldb_srcdir}.tar.xz.sig
 Source2:	tstellar-gpg-key.asc
 
 BuildRequires:	gcc
@@ -130,6 +131,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Thu Jun 03 2021 Tom Stellard <tstellar@redhat.com> - 12.0.0~rc1-1
+- 12.0.0-rc1 Release
+
 * Fri Apr 16 2021 Tom Stellard <tstellar@redhat.com> - 12.0.0-1
 - 12.0.0 Release
 
