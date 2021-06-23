@@ -18,8 +18,26 @@
     required_packages:
       - gcc-c++
       - lldb
+      # the requirements below are for the integration suite
+      - cmake
+      - llvm-devel
+      - clang
+      - clang-analyzer
+      - clang-tools-extra
+      - compiler-rt
+      - ninja-build
+      - libcxx-devel
+      - libomp-devel
+      - python-lit
+      - lld
+      - lldb
+      - git
+      - make
+      - libstdc++-static
+      - clang-devel
     tests:
       # rhbz#1567262
       - python-embedded-interpreter:
           dir: python-embedded-interpreter
           run: ./runtest.sh
+      - integration-test-suite
