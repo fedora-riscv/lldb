@@ -1,10 +1,10 @@
-%global rc_ver 1
+%global rc_ver 3
 %global lldb_version 12.0.1
 %global lldb_srcdir %{name}-%{lldb_version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
 Version:	%{lldb_version}%{?rc_ver:~rc%{rc_ver}}
-Release:	2%{?dist}
+Release:	1%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -131,6 +131,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Thu Jul 01 2021 Tom Stellard <tstellar@redhat.com> - 12.0.0~rc3-1
+- 12.0.0-rc3 Release
+
 * Fri Jun 04 2021 Python Maint <python-maint@redhat.com> - 12.0.1~rc1-2
 - Rebuilt for Python 3.10
 
