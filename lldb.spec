@@ -1,9 +1,10 @@
-#%%global rc_ver 5
-%global lldb_srcdir %{name}-%{version}%{?rc_ver:rc%{rc_ver}}.src
+#global rc_ver 3
+%global lldb_version 12.0.1
+%global lldb_srcdir %{name}-%{lldb_version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
-Version:	12.0.0%{?rc_ver:~rc%{rc_ver}}
-Release:	3%{?dist}
+Version:	%{lldb_version}%{?rc_ver:~rc%{rc_ver}}
+Release:	1%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -130,6 +131,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Wed Jul 14 2021 Tom Stellard <tstellar@redhat.com> - 12.0.1-1
+- 12.0.1 Release
+
 * Wed Jun 09 2021 Tom Stellard <tstellar@redhat.com> - 12.0.0-3
 - Bump release again to correct older nvr typo
 
