@@ -1,10 +1,10 @@
-#global rc_ver 3
-%global lldb_version 12.0.1
+%global rc_ver 1
+%global lldb_version 13.0.0
 %global lldb_srcdir %{name}-%{lldb_version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
 Version:	%{lldb_version}%{?rc_ver:~rc%{rc_ver}}
-Release:	2%{?dist}
+Release:	1%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -34,9 +34,6 @@ Requires:	python3-lldb
 
 # For origin certification
 BuildRequires:	gnupg2
-
-Patch0:     0001-PATCH-lldb-Portable-asm-ptrace.h-include.patch
-Patch1:     0002-PATCH-lldb-Support-DWARF-5-DW_FORM_line_strp-used-by.patch
 
 %description
 LLDB is a next generation, high-performance debugger. It is built as a set
@@ -131,6 +128,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Mon Aug 09 2021 Tom Stellard <tstellar@redhat.com> - 13.0.0~rc1-1
+- 13.0.0-rc1 Release
+
 * Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 12.0.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
 
