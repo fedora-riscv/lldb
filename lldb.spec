@@ -1,4 +1,4 @@
-%global rc_ver 3
+#global rc_ver 3
 %global lldb_version 13.0.0
 %global lldb_srcdir %{name}-%{lldb_version}%{?rc_ver:rc%{rc_ver}}.src
 
@@ -128,6 +128,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Fri Oct 01 2021 Tom Stellard <tstellar@redhat.com> - 13.0.0-1
+- 13.0.0 Release
+
 * Wed Sep 22 2021 Tom Stellard <tstellar@redhat.com> - 13.0.0~rc3-1
 - 13.0.0-rc3 Release
 
