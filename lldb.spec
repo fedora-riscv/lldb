@@ -64,10 +64,6 @@ The package contains the LLDB Python module.
 %autosetup -n %{lldb_srcdir} -p2
 
 %build
-
-CFLAGS="%{optflags} -Wno-error=format-security"
-CXXFLAGS="%{optflags} -Wno-error=format-security"
-
 %cmake  -GNinja \
 	-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 	-DCMAKE_SKIP_RPATH:BOOL=ON \
