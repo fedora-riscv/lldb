@@ -1,0 +1,25 @@
+summary: lldb tests for build/PR gating
+adjust:
+  - because: "Plan to be ran when either executed locally, or executed by CI system to gate a build or PR."
+    when: >-
+      trigger is defined
+      and trigger != commit
+      and trigger != build
+    enabled: false
+discover:
+    - name: lldb-tests
+      how: fmf
+    - name: upstream-llvm-integration-testsuite
+      how: fmf
+      url: https://src.fedoraproject.org/rpms/llvm.git
+      ref: rawhide
+      test: integration-test-suite
+execute:
+    how: tmt
+prepare:
+    - name: packages
+      how: install
+      package: lldb
+provision:
+  hardware:
+    memory: ">= 4 GiB"

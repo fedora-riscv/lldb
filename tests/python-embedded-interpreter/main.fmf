@@ -1,0 +1,5 @@
+summary: "Test lldb embedded interpreter (rhbz#1567262)"
+test: ./test.sh
+require:
+  - lldb
+  - gcc-c++
