@@ -1,5 +1,14 @@
 summary: "Test lldb embedded interpreter (rhbz#1567262)"
-test: ./test.sh
+test: "$WITH_SCL ./test.sh"
 require:
-  - lldb
   - gcc-c++
+adjust:
+  # Common requirements when LLVM is not SCL-ized
+  - require+:
+      - lldb
+    when: "collection is not defined"
+
+  # Requirements for SCL-ized LLVM
+  - require+:
+      - llvm-toolset-13.0-lldb
+    when: "collection == llvm-toolset-13.0"
