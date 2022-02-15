@@ -1,7 +1,7 @@
 #!/bin/sh -eux
 
 # Verify the formal side of things, lldb should really depend on its Python bits.
-rpm -q --requires lldb | grep python3-lldb
+rpm -q --requires "$LLDB_PACKAGE" | grep python3-lldb
 
 # Then verify things actually works.
 g++ -g test.cpp

@@ -6,9 +6,13 @@ adjust:
   # Common requirements when LLVM is not SCL-ized
   - require+:
       - lldb
+    environment+:
+      LLDB_PACKAGE: lldb
     when: "collection is not defined"
 
   # Requirements for SCL-ized LLVM
   - require+:
       - llvm-toolset-13.0-lldb
+    environment+:
+      LLDB_PACKAGE: llvm-toolset-13.0-lldb
     when: "collection == llvm-toolset-13.0"
