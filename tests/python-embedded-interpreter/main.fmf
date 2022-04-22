@@ -16,3 +16,8 @@ adjust:
     environment+:
       LLDB_PACKAGE: llvm-toolset-13.0-lldb
     when: "collection == llvm-toolset-13.0"
+  - require+:
+      - llvm-toolset-14.0-lldb
+    environment+:
+      LLDB_PACKAGE: llvm-toolset-14.0-lldb
+    when: "collection == llvm-toolset-14.0"
