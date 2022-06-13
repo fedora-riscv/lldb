@@ -4,7 +4,7 @@
 
 Name:		lldb
 Version:	%{lldb_version}%{?rc_ver:~rc%{rc_ver}}
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -124,6 +124,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Mon Jun 13 2022 Python Maint <python-maint@redhat.com> - 14.0.0-2
+- Rebuilt for Python 3.11
+
 * Wed Mar 23 2022 Timm Bäder <tbaeder@redhat.com> - 14.0.0-1
 - Update to 14.0.0
 
