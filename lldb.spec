@@ -1,4 +1,4 @@
-%global lldb_version 14.0.0
+%global lldb_version 14.0.5
 #global rc_ver 2
 %global lldb_srcdir %{name}-%{lldb_version}%{?rc_ver:rc%{rc_ver}}.src
 
@@ -124,6 +124,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Mon Jun 20 2022 Timm Bäder <tbaeder@redhat.com> - 14.0.5-1
+- Update to 14.0.5
+
 * Wed Mar 23 2022 Timm Bäder <tbaeder@redhat.com> - 14.0.0-1
 - Update to 14.0.0
 
