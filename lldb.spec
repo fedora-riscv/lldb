@@ -32,6 +32,13 @@ BuildRequires:	multilib-rpm-config
 
 Requires:	python3-lldb
 
+# s390x build otherwise fails with:
+#In file included from source/Plugins/Process/Linux/NativeRegisterContextLinux_s390x.cpp:21:
+#/usr/include/linux/uio.h:17:8: error: redefinition of 'struct iovec'
+#   17 | struct iovec
+#      |        ^~~~~
+Patch0:		remove-uio-include.patch
+
 # For origin certification
 BuildRequires:	gnupg2
 
