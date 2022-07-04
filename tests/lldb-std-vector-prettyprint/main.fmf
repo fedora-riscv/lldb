@@ -1,0 +1,10 @@
+summary: "Test lldb std::vector pretty printer"
+test: "$WITH_SCL ./test.sh"
+require:
+  - gcc-c++
+  - lldb
+adjust:
+  # rhbz#2077932 rhbz#2082508
+  - because: "std::vector pretty printer does not work properly in RHEL<9 due to older libstdc++"
+    enabled: false
+    when: distro < rhel-9

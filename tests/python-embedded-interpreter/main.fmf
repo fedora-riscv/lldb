@@ -1,4 +1,5 @@
 summary: "Test lldb embedded interpreter (rhbz#1567262)"
+description: "Ensure that lldb depends on python3-lldb"
 test: "$WITH_SCL ./test.sh"
 require:
   - gcc-c++

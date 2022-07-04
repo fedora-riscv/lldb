@@ -3,7 +3,7 @@
 int
 main ()
 {
-  std::vector<int> v (1, 2);
-  std::vector<int>::iterator it(v.begin());
+  int i = 1;
+  float f = 1.0;
   return 0;
 }
