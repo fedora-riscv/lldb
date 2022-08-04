@@ -1,20 +1,20 @@
-%global lldb_version 14.0.5
-#global rc_ver 2
+%global toolchain clang
+%global lldb_version 15.0.0
+#global rc_ver 3
 %global lldb_srcdir %{name}-%{lldb_version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
 Version:	%{lldb_version}%{?rc_ver:~rc%{rc_ver}}
-Release:	3%{?dist}
+Release:	1%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
 URL:		http://lldb.llvm.org/
 Source0:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{lldb_version}%{?rc_ver:-rc%{rc_ver}}/%{lldb_srcdir}.tar.xz
 Source1:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{lldb_version}%{?rc_ver:-rc%{rc_ver}}/%{lldb_srcdir}.tar.xz.sig
-Source2:	tstellar-gpg-key.asc
+Source2:	release-keys.asc
 
-BuildRequires:	gcc
-BuildRequires:	gcc-c++
+BuildRequires:	clang
 BuildRequires:	cmake
 BuildRequires:	ninja-build
 BuildRequires:	llvm-devel = %{version}
@@ -31,13 +31,6 @@ BuildRequires:	python3-lit
 BuildRequires:	multilib-rpm-config
 
 Requires:	python3-lldb
-
-# s390x build otherwise fails with:
-#In file included from source/Plugins/Process/Linux/NativeRegisterContextLinux_s390x.cpp:21:
-#/usr/include/linux/uio.h:17:8: error: redefinition of 'struct iovec'
-#   17 | struct iovec
-#      |        ^~~~~
-Patch0:		0001-lldb-Replace-linux-uio.h-with-sys-uio.h-in-NativeReg.patch
 
 # For origin certification
 BuildRequires:	gnupg2
@@ -71,6 +64,8 @@ The package contains the LLDB Python module.
 %autosetup -n %{lldb_srcdir} -p2
 
 %build
+%global _lto_cflags -flto=thin
+
 %cmake  -GNinja \
 	-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 	-DCMAKE_SKIP_RPATH:BOOL=ON \
@@ -131,6 +126,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Tue Sep 06 2022 Nikita Popov <npopov@redhat.com> - 15.0.0-1
+- Update to LLVM 15.0.0
+
 * Tue Aug 09 2022 Nikita Popov <npopov@redhat.com> - 14.0.5-3
 - Fix s390x build
 
