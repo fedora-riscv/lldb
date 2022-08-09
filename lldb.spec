@@ -4,7 +4,7 @@
 
 Name:		lldb
 Version:	%{lldb_version}%{?rc_ver:~rc%{rc_ver}}
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -37,7 +37,7 @@ Requires:	python3-lldb
 #/usr/include/linux/uio.h:17:8: error: redefinition of 'struct iovec'
 #   17 | struct iovec
 #      |        ^~~~~
-Patch0:		remove-uio-include.patch
+Patch0:		0001-lldb-Replace-linux-uio.h-with-sys-uio.h-in-NativeReg.patch
 
 # For origin certification
 BuildRequires:	gnupg2
@@ -131,6 +131,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Tue Aug 09 2022 Nikita Popov <npopov@redhat.com> - 14.0.5-3
+- Fix s390x build
+
 * Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 14.0.5-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
 
