@@ -1,11 +1,16 @@
 %global toolchain clang
+
+# Opt out of https://fedoraproject.org/wiki/Changes/fno-omit-frame-pointer
+# https://bugzilla.redhat.com/show_bug.cgi?id=2158587
+%undefine _include_frame_pointers
+
 %global lldb_version 15.0.6
 #global rc_ver 3
 %global lldb_srcdir %{name}-%{lldb_version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
 Version:	%{lldb_version}%{?rc_ver:~rc%{rc_ver}}
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	NCSA
@@ -130,6 +135,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Thu Jan 12 2023 Tom Stellard <tstellar@redhat.com> - 15.0.6-2
+- Omit frame pointers when building
+
 * Tue Dec 06 2022 Nikita Popov <npopov@redhat.com> - 15.0.6-1
 - Update to LLVM 15.0.6
 
