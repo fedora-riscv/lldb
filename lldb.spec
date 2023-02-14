@@ -4,24 +4,23 @@
 # https://bugzilla.redhat.com/show_bug.cgi?id=2158587
 %undefine _include_frame_pointers
 
-%global lldb_version 15.0.7
-#global rc_ver 3
+%global lldb_version 16.0.0
+%global rc_ver 1
 %global lldb_srcdir %{name}-%{lldb_version}%{?rc_ver:rc%{rc_ver}}.src
+%global cmake_srcdir cmake-%{lldb_version}%{?rc_ver:rc%{rc_ver}}.src
 
 Name:		lldb
 Version:	%{lldb_version}%{?rc_ver:~rc%{rc_ver}}
-Release:	3%{?dist}
+Release:	1%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	Apache-2.0 WITH LLVM-exception OR NCSA
 URL:		http://lldb.llvm.org/
 Source0:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{lldb_version}%{?rc_ver:-rc%{rc_ver}}/%{lldb_srcdir}.tar.xz
 Source1:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{lldb_version}%{?rc_ver:-rc%{rc_ver}}/%{lldb_srcdir}.tar.xz.sig
-Source2:	release-keys.asc
-
-# TODO: Drop once 16.0.0 is out
-Patch0:		https://github.com/llvm/llvm-project/commit/6f59f302e4358b4dc869bc298c2b9c06aa716b60.diff
-##
+Source2:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{lldb_version}%{?rc_ver:-rc%{rc_ver}}/%{cmake_srcdir}.tar.xz
+Source3:	https://github.com/llvm/llvm-project/releases/download/llvmorg-%{lldb_version}%{?rc_ver:-rc%{rc_ver}}/%{cmake_srcdir}.tar.xz.sig
+Source4:	release-keys.asc
 
 BuildRequires:	clang
 BuildRequires:	cmake
@@ -69,7 +68,13 @@ Requires:	%{name}%{?_isa} = %{version}-%{release}
 The package contains the LLDB Python module.
 
 %prep
-%{gpgverify} --keyring='%{SOURCE2}' --signature='%{SOURCE1}' --data='%{SOURCE0}'
+%{gpgverify} --keyring='%{SOURCE4}' --signature='%{SOURCE1}' --data='%{SOURCE0}'
+%{gpgverify} --keyring='%{SOURCE4}' --signature='%{SOURCE3}' --data='%{SOURCE2}'
+%setup -T -q -b 2 -n %{cmake_srcdir}
+# TODO: It would be more elegant to set -DLLVM_COMMON_CMAKE_UTILS=%{_builddir}/%{cmake_srcdir},
+# but this is not a CACHED variable, so we can't actually set it externally :(
+cd ..
+mv %{cmake_srcdir} cmake
 %autosetup -n %{lldb_srcdir} -p2
 
 %build
@@ -135,6 +140,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Tue Feb 14 2023 Tulio Magno Quites Machado Filho <tuliom@redhat.com> - 16.0.0~rc1-1
+- Update to LLVM 16.0.0 RC1
+
 * Thu Jan 19 2023 Tulio Magno Quites Machado Filho <tuliom@redhat.com> - 15.0.7-3
 - Include the Apache license adopted in 2019.
 
