@@ -5,7 +5,7 @@
 %undefine _include_frame_pointers
 
 %global lldb_version 16.0.0
-%global rc_ver 1
+%global rc_ver 3
 %global lldb_srcdir %{name}-%{lldb_version}%{?rc_ver:rc%{rc_ver}}.src
 %global cmake_srcdir cmake-%{lldb_version}%{?rc_ver:rc%{rc_ver}}.src
 
@@ -140,6 +140,9 @@ rm -f %{buildroot}%{python3_sitearch}/six.*
 %{python3_sitearch}/lldb
 
 %changelog
+* Thu Feb 23 2023 Tulio Magno Quites Machado Filho <tuliom@redhat.com> - 16.0.0~rc3-1
+- Update to LLVM 16.0.0 RC3
+
 * Tue Feb 14 2023 Tulio Magno Quites Machado Filho <tuliom@redhat.com> - 16.0.0~rc1-1
 - Update to LLVM 16.0.0 RC1
 
