@@ -1,0 +1,30 @@
+From fb389f0cd6b4e8996157fa7d7bc347fde7b43656 Mon Sep 17 00:00:00 2001
+From: Tulio Magno Quites Machado Filho <tuliom@redhat.com>
+Date: Thu, 23 Mar 2023 16:06:10 -0300
+Subject: [PATCH] [lldb] Change LLVM_COMMON_CMAKE_UTILS usage
+
+Let LLVM_COMMON_CMAKE_UTILS store the directory where cmake modules are
+available and stop assuming its directory structure.
+---
+ lldb/CMakeLists.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/lldb/CMakeLists.txt b/lldb/CMakeLists.txt
+index 20d584c48bad..7bad2a9928cd 100644
+--- a/lldb/CMakeLists.txt
++++ b/lldb/CMakeLists.txt
+@@ -1,9 +1,9 @@
+ cmake_minimum_required(VERSION 3.13.4)
+ 
+ if(NOT DEFINED LLVM_COMMON_CMAKE_UTILS)
+-  set(LLVM_COMMON_CMAKE_UTILS ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
++  set(LLVM_COMMON_CMAKE_UTILS ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/Modules)
+ endif()
+-include(${LLVM_COMMON_CMAKE_UTILS}/Modules/CMakePolicy.cmake
++include(${LLVM_COMMON_CMAKE_UTILS}/CMakePolicy.cmake
+   NO_POLICY_SCOPE)
+ 
+ # Add path for custom modules.
+-- 
+2.39.2
+
