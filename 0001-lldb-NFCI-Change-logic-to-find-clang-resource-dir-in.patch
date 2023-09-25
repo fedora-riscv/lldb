@@ -1,0 +1,80 @@
+From a809720102fae8d1b5a7073f99f9dae9395c5f41 Mon Sep 17 00:00:00 2001
+From: Alex Langford <alangford@apple.com>
+Date: Tue, 25 Jul 2023 15:38:04 -0700
+Subject: [PATCH] [lldb][NFCI] Change logic to find clang resource dir in
+ standalone builds
+
+As of 0beffb854209a41f31beb18f9631258349a99299 there is a CMake
+function to actually calculate the relative path to the clang resource
+directory. Currently we have some bespoke logic that looks in a few
+places, but with this new function we should be able to eliminate some
+complexity here.
+
+Also, I moved the functionality from LLDBConfig to LLDBStandalone since
+it is only used in standalone builds.
+
+Differential Revision: https://reviews.llvm.org/D156270
+---
+ lldb/cmake/modules/LLDBConfig.cmake     | 24 ------------------------
+ lldb/cmake/modules/LLDBStandalone.cmake | 13 +++++++++++++
+ 2 files changed, 13 insertions(+), 24 deletions(-)
+
+diff --git a/lldb/cmake/modules/LLDBConfig.cmake b/lldb/cmake/modules/LLDBConfig.cmake
+index 1393342dd5cb..ce90ecabc6a5 100644
+--- a/lldb/cmake/modules/LLDBConfig.cmake
++++ b/lldb/cmake/modules/LLDBConfig.cmake
+@@ -282,30 +282,6 @@ if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
+   endif()
+ endif()
+ 
+-
+-# If LLDB is building against a prebuilt Clang, then the Clang resource
+-# directory that LLDB is using for its embedded Clang instance needs to point
+-# to the resource directory of the used Clang installation.
+-if (NOT TARGET clang-resource-headers)
+-  set(LLDB_CLANG_RESOURCE_DIR_NAME "${LLVM_VERSION_MAJOR}")
+-  # Iterate over the possible places where the external resource directory
+-  # could be and pick the first that exists.
+-  foreach(CANDIDATE "${Clang_DIR}/../.." "${LLVM_DIR}" "${LLVM_LIBRARY_DIRS}"
+-                    "${LLVM_BUILD_LIBRARY_DIR}"
+-                    "${LLVM_LIBRARY_DIR}")
+-    # Build the resource directory path by appending 'clang/<version number>'.
+-    set(CANDIDATE_RESOURCE_DIR "${CANDIDATE}/clang/${LLDB_CLANG_RESOURCE_DIR_NAME}")
+-    if (IS_DIRECTORY "${CANDIDATE_RESOURCE_DIR}")
+-      set(LLDB_EXTERNAL_CLANG_RESOURCE_DIR "${CANDIDATE_RESOURCE_DIR}")
+-      break()
+-    endif()
+-  endforeach()
+-
+-  if (NOT LLDB_EXTERNAL_CLANG_RESOURCE_DIR)
+-    message(FATAL_ERROR "Expected directory for clang-resource headers not found: ${LLDB_EXTERNAL_CLANG_RESOURCE_DIR}")
+-  endif()
+-endif()
+-
+ # Find Apple-specific libraries or frameworks that may be needed.
+ if (APPLE)
+   if(NOT APPLE_EMBEDDED)
+diff --git a/lldb/cmake/modules/LLDBStandalone.cmake b/lldb/cmake/modules/LLDBStandalone.cmake
+index e9bcabcb63de..fd16716d7141 100644
+--- a/lldb/cmake/modules/LLDBStandalone.cmake
++++ b/lldb/cmake/modules/LLDBStandalone.cmake
+@@ -128,3 +128,16 @@ endif()
+ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib${LLVM_LIBDIR_SUFFIX})
+ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib${LLVM_LIBDIR_SUFFIX})
++
++# If LLDB is building against a prebuilt Clang, then the Clang resource
++# directory that LLDB is using for its embedded Clang instance needs to point to
++# the resource directory of the used Clang installation.
++if (NOT TARGET clang-resource-headers)
++  include(GetClangResourceDir)
++  get_clang_resource_dir(LLDB_EXTERNAL_CLANG_RESOURCE_DIR
++    PREFIX "${Clang_DIR}/../../../")
++
++  if (NOT EXISTS ${LLDB_EXTERNAL_CLANG_RESOURCE_DIR})
++    message(FATAL_ERROR "Expected directory for clang-resource-headers not found: ${LLDB_EXTERNAL_CLANG_RESOURCE_DIR}")
++  endif()
++endif()
+-- 
+2.41.0
+
