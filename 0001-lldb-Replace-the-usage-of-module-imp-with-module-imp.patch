@@ -1,0 +1,91 @@
+From 16fd09f102eff20825847e32f225715960d1c082 Mon Sep 17 00:00:00 2001
+From: Tulio Magno Quites Machado Filho <tuliom@redhat.com>
+Date: Wed, 25 Oct 2023 10:48:53 -0300
+Subject: [PATCH] [lldb] Replace the usage of module imp with module importlib
+
+imp got removed in Python 3.12 [1] and the community recommends using
+importlib in newer Python versions.
+
+[1] https://docs.python.org/3.12/whatsnew/3.12.html#imp
+---
+ lldb/scripts/use_lldb_suite.py  | 30 ++++++++++++++++++++++--------
+ lldb/test/API/use_lldb_suite.py | 29 +++++++++++++++++++++--------
+ 2 files changed, 43 insertions(+), 16 deletions(-)
+
+diff --git a/lldb/scripts/use_lldb_suite.py b/lldb/scripts/use_lldb_suite.py
+index 6388d87b181c..4cedfa532cf9 100644
+--- a/lldb/scripts/use_lldb_suite.py
++++ b/lldb/scripts/use_lldb_suite.py
+@@ -17,10 +17,25 @@ def find_lldb_root():
+             return lldb_root
+ 
+ lldb_root = find_lldb_root()
+-import imp
+-fp, pathname, desc = imp.find_module("use_lldb_suite_root", [lldb_root])
+-try:
+-    imp.load_module("use_lldb_suite_root", fp, pathname, desc)
+-finally:
+-    if fp:
+-        fp.close()
++
++# Module imp got removed in Python 3.12.
++if (
++    sys.version_info.major == 3 and sys.version_info.minor >= 12
++) or sys.version_info.major > 3:
++    import importlib.machinery
++    import importlib.util
++
++    path = os.path.join(lldb_root, "use_lldb_suite_root.py")
++    loader = importlib.machinery.SourceFileLoader("use_lldb_suite_root", path)
++    spec = importlib.util.spec_from_loader("use_lldb_suite_root", loader=loader)
++    module = importlib.util.module_from_spec(spec)
++    loader.exec_module(module)
++else:
++    import imp
++
++    fp, pathname, desc = imp.find_module("use_lldb_suite_root", [lldb_root])
++    try:
++        imp.load_module("use_lldb_suite_root", fp, pathname, desc)
++    finally:
++        if fp:
++            fp.close()
+diff --git a/lldb/test/API/use_lldb_suite.py b/lldb/test/API/use_lldb_suite.py
+index e237dd4b8a56..c9332d9921b4 100644
+--- a/lldb/test/API/use_lldb_suite.py
++++ b/lldb/test/API/use_lldb_suite.py
+@@ -20,11 +20,24 @@ def find_lldb_root():
+ 
+ lldb_root = find_lldb_root()
+ 
+-import imp
+-
+-fp, pathname, desc = imp.find_module("use_lldb_suite_root", [lldb_root])
+-try:
+-    imp.load_module("use_lldb_suite_root", fp, pathname, desc)
+-finally:
+-    if fp:
+-        fp.close()
++# Module imp got removed in Python 3.12.
++if (
++    sys.version_info.major == 3 and sys.version_info.minor >= 12
++) or sys.version_info.major > 3:
++    import importlib.machinery
++    import importlib.util
++
++    path = os.path.join(lldb_root, "use_lldb_suite_root.py")
++    loader = importlib.machinery.SourceFileLoader("use_lldb_suite_root", path)
++    spec = importlib.util.spec_from_loader("use_lldb_suite_root", loader=loader)
++    module = importlib.util.module_from_spec(spec)
++    loader.exec_module(module)
++else:
++    import imp
++
++    fp, pathname, desc = imp.find_module("use_lldb_suite_root", [lldb_root])
++    try:
++        imp.load_module("use_lldb_suite_root", fp, pathname, desc)
++    finally:
++        if fp:
++            fp.close()
+-- 
+2.41.0
+
