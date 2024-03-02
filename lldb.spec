@@ -10,7 +10,7 @@
 
 Name:		lldb
 Version:	%{lldb_version}%{?rc_ver:~rc%{rc_ver}}
-Release:	1%{?dist}
+Release:	1.rv64%{?dist}
 Summary:	Next generation high-performance debugger
 
 License:	Apache-2.0 WITH LLVM-exception OR NCSA
@@ -71,7 +71,11 @@ The package contains the LLDB Python module.
 %autosetup -n %{lldb_srcdir} -p2
 
 %build
+%ifarch riscv64
+%global _lto_cflags %{nil}
+%else
 %global _lto_cflags -flto=thin
+%endif
 
 %cmake -GNinja \
 	-DCMAKE_BUILD_TYPE=RelWithDebInfo \
